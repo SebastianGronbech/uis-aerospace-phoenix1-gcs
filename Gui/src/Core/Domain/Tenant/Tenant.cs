@@ -5,8 +5,8 @@ public class Tenant
     public Guid Id { get; protected set; }
     public string Name { get; private set; }
 
-    private List<TenantUser> _tenantUsers = new();
-    public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers.AsReadOnly();
+    private readonly HashSet<TenantUser> _tenantUsers = new();
+    public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers;
 
     public DateTimeOffset CreatedAt { get; protected set; }
     public DateTimeOffset? UpdatedAt { get; private set; }
@@ -19,8 +19,13 @@ public class Tenant
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void AddTenantUser(Guid tenantUserId)
+    public void AddTenantUser(TenantUser tenantUser)
     {
-        _tenantUsers.Add(new TenantUser(tenantUserId));
+        if (tenantUser == null)
+        {
+            throw new ArgumentNullException(nameof(tenantUser));
+        }
+
+        _tenantUsers.Add(tenantUser);
     }
 }
