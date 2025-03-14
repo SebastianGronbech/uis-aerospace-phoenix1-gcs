@@ -1,6 +1,6 @@
 namespace Core.Domain.Tenants;
 
-public enum TenantUserRole
+public enum UserRole
 {
     Admin,
     Spectator

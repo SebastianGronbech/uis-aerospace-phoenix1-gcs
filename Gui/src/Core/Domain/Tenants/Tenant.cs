@@ -7,8 +7,8 @@ public class Tenant : BaseEntity
     public Guid Id { get; protected set; }
     public string Name { get; private set; }
 
-    private readonly HashSet<TenantUser> _tenantUsers = new();
-    public IReadOnlyCollection<TenantUser> TenantUsers => _tenantUsers;
+    private readonly HashSet<User> _users = new();
+    public IReadOnlyCollection<User> Users => _users;
 
     public DateTimeOffset CreatedAt { get; protected set; }
     public DateTimeOffset? UpdatedAt { get; private set; }
@@ -21,25 +21,25 @@ public class Tenant : BaseEntity
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void AddTenantUser(TenantUser tenantUser)
+    public void AddUser(User user)
     {
-        if (tenantUser == null)
+        if (user == null)
         {
-            throw new ArgumentNullException(nameof(tenantUser));
+            throw new ArgumentNullException(nameof(user));
         }
 
-        _tenantUsers.Add(tenantUser);
+        _users.Add(user);
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 
-    public void SetUserToAdmin(TenantUser tenantUser)
+    public void SetUserToAdmin(User user)
     {
-        if (tenantUser == null)
+        if (user == null)
         {
-            throw new ArgumentNullException(nameof(tenantUser));
+            throw new ArgumentNullException(nameof(user));
         }
 
-        tenantUser.SetRole(TenantUserRole.Admin);
+        user.SetRole(UserRole.Admin);
         // Events.Add(new TenantUserSetToAdminEvent(Id, tenantUser.Id));
     }
 }

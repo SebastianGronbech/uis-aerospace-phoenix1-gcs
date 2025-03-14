@@ -10,13 +10,14 @@ public class TenantTests
     {
         // Arrange
         var tenant = new Tenant(Guid.NewGuid(), "Test Tenant");
-        var tenantUser = new TenantUser(Guid.NewGuid());
+        var userEmail = new Email("johnDoe@example.com");
+        var User = new User("Test User", userEmail);
 
         // Act
-        tenant.AddTenantUser(tenantUser);
+        tenant.AddUser(User);
 
         // Assert
-        tenant.TenantUsers.Count().ShouldBe(1);
+        tenant.Users.Count().ShouldBe(1);
     }
 
     [Fact]
@@ -24,14 +25,15 @@ public class TenantTests
     {
         // Arrange
         var tenant = new Tenant(Guid.NewGuid(), "Test Tenant");
-        var tenantUser = new TenantUser(Guid.NewGuid());
+        var userEmail = new Email("johnDoe@example.com");
+        var User = new User("Test User", userEmail);
 
         // Act
-        tenant.AddTenantUser(tenantUser);
-        tenant.AddTenantUser(tenantUser);
+        tenant.AddUser(User);
+        tenant.AddUser(User);
 
         // Assert
-        tenant.TenantUsers.Count().ShouldBe(1);
+        tenant.Users.Count().ShouldBe(1);
     }
 
     [Fact]
@@ -41,7 +43,7 @@ public class TenantTests
         var tenant = new Tenant(Guid.NewGuid(), "Test Tenant");
 
         // Act
-        Action action = () => tenant.AddTenantUser(null!);
+        Action action = () => tenant.AddUser(null!);
 
         // Assert
         action.ShouldThrow<ArgumentNullException>();
@@ -52,14 +54,15 @@ public class TenantTests
     {
         // Arrange
         var tenant = new Tenant(Guid.NewGuid(), "Test Tenant");
-        var tenantUser = new TenantUser(Guid.NewGuid());
+        var userEmail = new Email("johnDoe@example.com");
+        var User = new User("Test User", userEmail);
 
         // Act
-        tenant.AddTenantUser(tenantUser);
-        tenant.SetUserToAdmin(tenantUser);
+        tenant.AddUser(User);
+        tenant.SetUserToAdmin(User);
 
         // Assert
-        tenantUser.Role.ShouldBe(TenantUserRole.Admin);
+        User.Role.ShouldBe(UserRole.Admin);
     }
 
     [Fact]
