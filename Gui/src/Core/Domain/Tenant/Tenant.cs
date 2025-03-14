@@ -12,9 +12,9 @@ public class Tenant
     public DateTimeOffset? UpdatedAt { get; private set; }
     public DateTimeOffset? DeletedAt { get; protected set; }
 
-    public Tenant(string name)
+    public Tenant(Guid id, string name)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
         CreatedAt = DateTimeOffset.UtcNow;
     }
