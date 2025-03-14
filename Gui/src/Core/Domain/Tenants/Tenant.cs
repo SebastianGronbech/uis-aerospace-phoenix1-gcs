@@ -1,6 +1,8 @@
-namespace Core.Domain.Tenant;
+using Core.SharedKernel;
 
-public class Tenant
+namespace Core.Domain.Tenants;
+
+public class Tenant : BaseEntity
 {
     public Guid Id { get; protected set; }
     public string Name { get; private set; }
@@ -27,5 +29,17 @@ public class Tenant
         }
 
         _tenantUsers.Add(tenantUser);
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void SetUserToAdmin(TenantUser tenantUser)
+    {
+        if (tenantUser == null)
+        {
+            throw new ArgumentNullException(nameof(tenantUser));
+        }
+
+        tenantUser.SetRole(TenantUserRole.Admin);
+        // Events.Add(new TenantUserSetToAdminEvent(Id, tenantUser.Id));
     }
 }
