@@ -1,4 +1,4 @@
-using Core.SharedKernel;
+using Gui.Core.SharedKernel;
 
 namespace Core.Domain.Tenants;
 
