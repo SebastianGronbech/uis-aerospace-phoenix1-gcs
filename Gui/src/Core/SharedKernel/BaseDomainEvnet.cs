@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Core.SharedKernel;
+namespace Gui.Core.SharedKernel;
 
 public abstract class BaseDomainEvent : INotification
 {

@@ -1,4 +1,4 @@
-namespace Core.SharedKernel;
+namespace Gui.Core.SharedKernel;
 
 public abstract class BaseEntity
 {
