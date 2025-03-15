@@ -1,8 +1,8 @@
-using Core.SharedKernel;
+using Gui.Core.SharedKernel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence;
+namespace Gui.Infrastructure.Persistence;
 
 public class ApplicationContext : DbContext
 {
