@@ -1,4 +1,4 @@
-namespace Core.Domain.Tenants;
+namespace Gui.Core.Domain.Tenants;
 
 public enum UserRole
 {
