@@ -1,43 +1,33 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../style.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
-    console.log("Sending data:", {
-      username: username,
-      passwordHash: password,
-    });
-
     try {
-      const response = await axios.post("http://localhost:5017/api/auth/login", {
-        username: username,
-        passwordHash: password,
-      });
+      await axios.post(
+        "http://localhost:5017/api/auth/login",  // ✅ Ensure this is a POST request
+        { username, passwordHash: password },
+        { withCredentials: true }  // ✅ This allows cookies to be sent
+      );
 
-      console.log("Login successful:", response.data);
-      localStorage.setItem("token", response.data.token);
-
-      
-      navigate("/dashboard", { replace: true });
+      // ✅ Redirect to dashboard after login
+      navigate("/dashboard");
     } catch (err) {
-      console.error("Login error:", err.response?.data);
       setError("Invalid username or password");
     }
   };
 
   return (
     <div className="login-wrapper">
-      {/* ✅ Logo moved outside the login box */}
       <img src="/image.png" alt="App Logo" className="logo" />
 
     <div>
