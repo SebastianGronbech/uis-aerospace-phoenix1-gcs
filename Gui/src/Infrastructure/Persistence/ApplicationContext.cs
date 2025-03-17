@@ -1,3 +1,4 @@
+using Gui.Core.Domain.Tenants;
 using Gui.Core.SharedKernel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ public class ApplicationContext : DbContext
         _mediator = mediator;
     }
 
-    // public DbSet<Telemetry> Telemetries { get; set; } = null!;
+    public DbSet<Tenant> Tenants { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

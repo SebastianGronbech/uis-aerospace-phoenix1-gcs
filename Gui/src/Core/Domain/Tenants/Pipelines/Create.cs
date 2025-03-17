@@ -6,7 +6,7 @@ public class Create
 {
     public record Request(string Name) : IRequest<Response>;
 
-    public record Response(bool Success, Tenant? createdTenant, string[] Errors);
+    public record Response(bool Success, Tenant? CreatedTenant, string[] Errors);
 
     public class Handler : IRequestHandler<Request, Response>
     {
