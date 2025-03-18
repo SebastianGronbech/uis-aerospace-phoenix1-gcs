@@ -5,16 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Gui.API.Controllers;
 
 [ApiController]
-// [Route("[controller]")]
 [Route("api/[controller]")]
-// [Route("api/tenants")]
 public class TenantsController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
     private readonly IMediator _mediator;
     private readonly ILogger<TenantsController> _logger;
 
@@ -40,6 +33,7 @@ public class TenantsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTenant([FromBody] Create.Request request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation($"Creating tenant with name: {request.Name}");
         var result = await _mediator.Send(request, cancellationToken);
 
         if (!result.Success)
@@ -50,15 +44,11 @@ public class TenantsController : ControllerBase
         return CreatedAtAction(nameof(GetTenantById), new { id = result.CreatedTenant!.Id }, result.CreatedTenant);
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpGet]
+    public async Task<IActionResult> GetTenants(CancellationToken cancellationToken)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var result = await _mediator.Send(new Get.Request(), cancellationToken);
+
+        return Ok(result);
     }
 }

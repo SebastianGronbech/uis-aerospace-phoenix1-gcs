@@ -35,7 +35,7 @@ public class RemoveUser
                 return new Response(Success: false, [ex.Message]);
             }
 
-            await _tenantRepository.UpdateAsync(tenant, cancellationToken);
+            _tenantRepository.Update(tenant);
 
             return new Response(true, Array.Empty<string>());
         }

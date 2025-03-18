@@ -1,3 +1,4 @@
+using Gui.Core.SharedKernel;
 using MediatR;
 
 namespace Gui.Core.Domain.Tenants.Pipelines;
@@ -11,10 +12,12 @@ public class Create
     public class Handler : IRequestHandler<Request, Response>
     {
         private readonly ITenantRepository _tenantRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public Handler(ITenantRepository tenantRepository)
+        public Handler(ITenantRepository tenantRepository, IUnitOfWork unitOfWork)
         {
             _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
@@ -39,7 +42,8 @@ public class Create
 
             var tenant = new Tenant(Guid.NewGuid(), request.Name);
 
-            await _tenantRepository.AddAsync(tenant, cancellationToken);
+            _tenantRepository.Add(tenant);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new Response(true, tenant, Array.Empty<string>());
         }

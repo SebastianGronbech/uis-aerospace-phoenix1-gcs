@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gui.Infrastructure.Persistence;
 
-public class ApplicationContext : DbContext
+public class ApplicationContext : DbContext, IUnitOfWork
 {
     private readonly IMediator _mediator;
     public ApplicationContext(DbContextOptions configuration, IMediator mediator) : base(configuration)

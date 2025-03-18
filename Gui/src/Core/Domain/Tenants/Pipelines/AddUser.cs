@@ -1,3 +1,4 @@
+using Gui.Core.SharedKernel;
 using MediatR;
 
 namespace Gui.Core.Domain.Tenants.Pipelines;
@@ -11,10 +12,12 @@ public class AddUser
     public class Handler : IRequestHandler<Request, Response>
     {
         private readonly ITenantRepository _tenantRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public Handler(ITenantRepository tenantRepository)
+        public Handler(ITenantRepository tenantRepository, IUnitOfWork unitOfWork)
         {
             _tenantRepository = tenantRepository ?? throw new ArgumentNullException(nameof(tenantRepository));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
@@ -22,7 +25,7 @@ public class AddUser
             var tenant = await _tenantRepository.GetByIdAsync(request.TenantId, cancellationToken);
             if (tenant == null)
             {
-                return new Response(Success: false, ["Tenant not found"]);
+                return new Response(Success: false, [$"Tenant with ID {request.TenantId} not found."]);
             }
 
             try
@@ -34,7 +37,8 @@ public class AddUser
                 return new Response(Success: false, [ex.Message]);
             }
 
-            await _tenantRepository.UpdateAsync(tenant, cancellationToken);
+            _tenantRepository.Update(tenant);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new Response(true, Array.Empty<string>());
         }

@@ -37,7 +37,7 @@ public class Tenant : BaseEntity
         var user = User.Create(userId);
         if (_users.Any(u => u.Id == user.Id))
         {
-            throw new InvalidOperationException($"User with id {userId} already exists");
+            throw new InvalidOperationException($"User with ID {userId} already exists");
         }
 
         _users.Add(user);
@@ -49,7 +49,7 @@ public class Tenant : BaseEntity
         var user = _users.FirstOrDefault(u => u.Id == userId);
         if (user == null)
         {
-            throw new EntityNotFoundException($"User with id {userId} not found");
+            throw new EntityNotFoundException($"User with ID {userId} not found.");
         }
 
         _users.Remove(user);
@@ -61,7 +61,7 @@ public class Tenant : BaseEntity
         var user = _users.FirstOrDefault(u => u.Id == userId);
         if (user == null)
         {
-            throw new EntityNotFoundException($"User with id {userId} not found");
+            throw new EntityNotFoundException($"User with ID {userId} not found.");
         }
 
         user.SetRole(UserRole.Admin);

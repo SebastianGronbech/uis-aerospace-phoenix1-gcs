@@ -19,11 +19,10 @@ public class GetById
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Tenant request Id: {request.Id}");
             var tenant = await _tenantRepository.GetByIdAsync(request.Id, cancellationToken);
             if (tenant == null)
             {
-                return new Response(Success: false, null, ["Tenant not found"]);
+                return new Response(Success: false, null, [$"Tenant with ID {request.Id} not found."]);
             }
 
             return new Response(true, tenant, Array.Empty<string>());
