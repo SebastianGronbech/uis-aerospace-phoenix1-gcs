@@ -19,7 +19,10 @@ public static class DependencyInjection
                 connectionString,
                 ServerVersion.AutoDetect(connectionString)
                 // b => b.MigrationsAssembly(typeof(GuiDbContext).Assembly.FullName))
-                ));
+                )
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
+        // .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information));
 
         // services.AddScoped<IApplicationDbContext>(provider => provider.GetService<GuiDbContext>());
 
@@ -31,7 +34,10 @@ public static class DependencyInjection
         // services.AddTransient<IIdentityService, IdentityService>();
 
         services.AddScoped<ITenantRepository, TenantRepository>();
-        services.AddScoped<IUnitOfWork, ApplicationContext>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        // services.AddScoped<IUnitOfWork, ApplicationContext>();
+        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
+
 
         return services;
     }

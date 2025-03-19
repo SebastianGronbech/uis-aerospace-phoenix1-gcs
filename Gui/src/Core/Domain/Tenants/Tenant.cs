@@ -35,12 +35,11 @@ public class Tenant : BaseEntity
     public void AddUser(Guid userId)
     {
         var user = User.Create(userId);
-        if (_users.Any(u => u.Id == user.Id))
+        if (!_users.Add(user))
         {
             throw new InvalidOperationException($"User with ID {userId} already exists");
         }
 
-        _users.Add(user);
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 

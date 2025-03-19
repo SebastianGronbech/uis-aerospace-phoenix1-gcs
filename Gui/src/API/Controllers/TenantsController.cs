@@ -33,7 +33,7 @@ public class TenantsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTenant([FromBody] Create.Request request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"Creating tenant with name: {request.Name}");
+        _logger.LogInformation("Creating tenant with name: {Name}", request.Name);
         var result = await _mediator.Send(request, cancellationToken);
 
         if (!result.Success)
