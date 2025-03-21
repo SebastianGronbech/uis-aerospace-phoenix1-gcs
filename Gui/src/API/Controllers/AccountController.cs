@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Gui.Infrastructure.Identity; // Adjust based on your actual namespace
+using Gui.Infrastructure.Identity; 
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,13 +12,7 @@ public class AccountController : ControllerBase
         _authService = authService;
     }
 
-    // GET: api/Account/Register
-    [HttpGet("register")]
-    public IActionResult GetRegisterInfo()
-    {
-        // In an API, you might return some helpful information
-        return Ok(new { message = "Use POST to register a new user." });
-    }
+
 
     // POST: api/Account/Register
     [HttpPost("register")]
@@ -54,9 +48,8 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginViewModel model)
 {
-    // Trim inputs if necessary
-    var username = model.Username.Trim();
-    var password = model.Password.Trim();
+    var username = model.Username;
+    var password = model.Password;
     
 
     if (!ModelState.IsValid)
@@ -66,9 +59,6 @@ public class AccountController : ControllerBase
 
     // Call the login method from AuthService
     var result = await _authService.LoginUserAsync(username, password);
-
-    // Log the result for debugging
-    Console.WriteLine($"Login result: Succeeded={result.Succeeded}, NotAllowed={result.IsNotAllowed}, LockedOut={result.IsLockedOut}");
 
     if (result.Succeeded)
     {
