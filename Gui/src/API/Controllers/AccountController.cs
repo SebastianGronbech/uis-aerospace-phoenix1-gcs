@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Gui.Infrastructure.Identity; 
+using Gui.Infrastructure.Identity;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -9,16 +9,12 @@ public class AccountController : ControllerBase
 
     public AccountController(AuthService authService)
     {
-        _authService = authService;
+        _authService = authService ?? throw new ArgumentNullException(nameof(authService));
     }
 
-
-
-    // POST: api/Account/Register
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
-        
         Console.WriteLine($"Register called with Username: {model.Username}, Password: {model.Password}, ConfirmPassword: {model.ConfirmPassword}");
 
         if (!ModelState.IsValid)
@@ -43,46 +39,43 @@ public class AccountController : ControllerBase
         return BadRequest(ModelState);
     }
 
-    // POST: api/Account/login
-    
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginViewModel model)
-{
-    var username = model.Username;
-    var password = model.Password;
-    
-
-    if (!ModelState.IsValid)
     {
-        return BadRequest(ModelState);
-    }
+        var username = model.Username;
+        var password = model.Password;
 
-    // Call the login method from AuthService
-    var result = await _authService.LoginUserAsync(username, password);
 
-    if (result.Succeeded)
-    {
-        return Ok("Login successful");
-    }
-    else
-    {
-        return Unauthorized("Invalid username or password");
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Call the login method from AuthService
+        var result = await _authService.LoginUserAsync(username, password);
+
+        if (result.Succeeded)
+        {
+            return Ok("Login successful");
+        }
+        else
+        {
+            return Unauthorized("Invalid username or password");
+        }
     }
 }
 
-
-    // Nested view model for registration
-    public class RegisterViewModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string ConfirmPassword { get; set; } = string.Empty;
-    }
-    public class LoginViewModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
+// Nested view model for registration
+public class RegisterViewModel
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+public class LoginViewModel
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
 
 

@@ -13,7 +13,7 @@ namespace Gui.Infrastructure.Persistence
         public ApplicationContext(DbContextOptions options, IMediator mediator)
             : base(options)
         {
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         //public DbSet<IdentityUser> Users { get; set; } = null!;

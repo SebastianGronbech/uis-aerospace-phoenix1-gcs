@@ -17,7 +17,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => 
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationContext>();
 
