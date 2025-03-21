@@ -1,4 +1,4 @@
-using Gui.Core.Domain.Tenants;
+using Gui.Core.Domain.Users;
 using Gui.Core.SharedKernel;
 using Gui.Infrastructure.Persistence;
 using Gui.Infrastructure.Repositories;
@@ -33,9 +33,7 @@ public static class DependencyInjection
         // services.AddTransient<IDateTime, DateTimeService>();
         // services.AddTransient<IIdentityService, IdentityService>();
 
-        services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        // services.AddScoped<IUnitOfWork, ApplicationContext>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
 
 

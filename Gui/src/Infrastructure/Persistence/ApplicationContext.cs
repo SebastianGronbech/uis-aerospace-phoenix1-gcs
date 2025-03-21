@@ -1,4 +1,4 @@
-using Gui.Core.Domain.Tenants;
+using Gui.Core.Domain.Users;
 using Gui.Core.SharedKernel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,21 +16,32 @@ public class ApplicationContext : DbContext, IUnitOfWork
         _logger = logger;
     }
 
-    public DbSet<Tenant> Tenants { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Tenant>()
-            .HasMany(t => t.Users)
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
+        // modelBuilder.Entity<Tenant>()
+        //     .HasKey(t => t.Id);
 
-        modelBuilder.Entity<User>()
-            .Property(u => u.UpdatedAt)
-            .IsConcurrencyToken();
+        // modelBuilder.Entity<Tenant>()
+        //     .Property(t => t.Name)
+        //     .IsRequired();
+
+        // modelBuilder.Entity<Tenant>()
+        //     .HasMany(t => t.Users)
+        //     .WithOne()
+        //     .HasForeignKey(u => u.TenantId)
+        //     .OnDelete(DeleteBehavior.Cascade);
+
+        // modelBuilder.Entity<User>()
+        //     .Navigation(u => u.Tenant)
+        //     .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+        // modelBuilder.Entity<User>()
+        //     .Property(u => u.UpdatedAt)
+        //     .IsConcurrencyToken();
 
     }
 
