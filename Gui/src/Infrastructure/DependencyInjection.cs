@@ -1,7 +1,9 @@
 using Gui.Core.Domain.Users;
 using Gui.Core.SharedKernel;
+using Gui.Infrastructure.Identity;
 using Gui.Infrastructure.Persistence;
 using Gui.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,12 +28,17 @@ public static class DependencyInjection
 
         // services.AddScoped<IApplicationDbContext>(provider => provider.GetService<GuiDbContext>());
 
-        // services.AddIdentity<ApplicationUser, IdentityRole>()
-        //     .AddEntityFrameworkStores<GuiDbContext>()
-        //     .AddDefaultTokenProviders();
+        services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationContext>()
+            .AddDefaultTokenProviders();
 
         // services.AddTransient<IDateTime, DateTimeService>();
-        // services.AddTransient<IIdentityService, IdentityService>();
+
+        // services.AddDefaultIdentity<IdentityUser>(options =>
+        //     options.SignIn.RequireConfirmedAccount = false)
+        //     .AddEntityFrameworkStores<ApplicationContext>();
+
+        services.AddScoped<AuthService>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
