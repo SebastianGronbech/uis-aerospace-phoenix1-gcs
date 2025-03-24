@@ -11,4 +11,11 @@ public class Unit : BaseEntity
     public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset? UpdatedAt { get; private set; }
     public DateTimeOffset? DeletedAt { get; protected set; }
+
+    private Unit(Guid id, string name)
+    {
+        Id = id;
+        Name = name;
+        CreatedAt = DateTimeOffset.UtcNow;
+    }
 }

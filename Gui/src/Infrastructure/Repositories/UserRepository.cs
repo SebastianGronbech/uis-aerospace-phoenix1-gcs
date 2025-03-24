@@ -15,25 +15,25 @@ public class UserRepository : IUserRepository
 
     public async Task<List<User>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await _context.Users
+        return await _context.Userss
             // .Include(u => u.Accesses)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Users
+        return await _context.Userss
             .Include(u => u.UnitAccesses)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
     public void Add(User user)
     {
-        _context.Users.AddAsync(user);
+        _context.Userss.AddAsync(user);
     }
 
     public void Remove(User user)
     {
-        _context.Users.Remove(user);
+        _context.Userss.Remove(user);
     }
 }

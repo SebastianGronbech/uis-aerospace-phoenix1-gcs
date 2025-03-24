@@ -16,7 +16,7 @@ public class ApplicationContext : IdentityDbContext<IdentityUser>, IUnitOfWork
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<User> Userss { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

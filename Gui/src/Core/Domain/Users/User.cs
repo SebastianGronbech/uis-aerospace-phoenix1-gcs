@@ -1,5 +1,4 @@
 using Gui.Core.SharedKernel;
-using MediatR;
 
 namespace Gui.Core.Domain.Users;
 
@@ -37,18 +36,7 @@ public class User : BaseEntity
         return new User(id, name);
     }
 
-    public void AddAccess(Guid unitId)
-    {
-        var unitAccess = UnitAccess.Create(Id, unitId);
-        if (!_unitAccesses.Add(unitAccess))
-        {
-            throw new InvalidOperationException($"Access to Unit with ID {unitId} already exists");
-        }
-
-        UpdatedAt = DateTimeOffset.UtcNow;
-    }
-
-    public void AddRole(Guid unitId, UserRole role)
+    public void SetRole(Guid unitId, UserRole role)
     {
         var unitAccess = _unitAccesses.FirstOrDefault(u => u.UnitId == unitId);
         if (unitAccess == null)
