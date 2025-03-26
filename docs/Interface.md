@@ -1,5 +1,9 @@
 # Interface with Telemetry
 
+- [Interface with Telemetry](#interface-with-telemetry)
+  - [Message Received](#message-received)
+  - [Message Sent](#message-sent)
+
 ```json
 {
     "Timestamp": {
