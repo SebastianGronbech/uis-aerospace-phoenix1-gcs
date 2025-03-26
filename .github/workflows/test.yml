@@ -1,0 +1,30 @@
+name: Run Gui Backend Tests
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+defaults:
+    run:
+        working-directory: ./Gui
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "9.x"
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Run tests
+              run: dotnet test
