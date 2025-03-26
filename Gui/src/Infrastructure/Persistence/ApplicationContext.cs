@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gui.Infrastructure.Persistence;
 
-public class ApplicationContext : IdentityDbContext<IdentityUser>, IUnitOfWork
+public class ApplicationContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>, IUnitOfWork
 {
     private readonly IMediator _mediator;
 
@@ -17,10 +17,17 @@ public class ApplicationContext : IdentityDbContext<IdentityUser>, IUnitOfWork
     }
 
     public DbSet<User> Userss { get; set; } = null!;
+    public DbSet<UserRoleAssignment> UserRoleAssignments { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<UserRoleAssignment>(entity =>
+        {
+            entity.HasKey(ura => ura.Id);
+        });
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())

@@ -1,6 +1,6 @@
 namespace Gui.Core.Domain.Users;
 
-public class UnitAccess
+public class UserRoleAssignment
 {
     public Guid Id { get; }
     public Guid UserId { get; private set; }
@@ -11,23 +11,28 @@ public class UnitAccess
     public DateTimeOffset? UpdatedAt { get; private set; }
     public DateTimeOffset? DeletedAt { get; protected set; }
 
-    private UnitAccess(Guid userId, Guid unitId)
+    private UserRoleAssignment(Guid userId, Guid unitId, UserRole role)
     {
         Id = Guid.NewGuid();
         UserId = userId;
         UnitId = unitId;
-        Role = UserRole.Spectator;
+        Role = role;
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    internal static UnitAccess Create(Guid userId, Guid unitId)
+    internal static UserRoleAssignment Create(Guid userId, Guid unitId, UserRole role)
     {
         if (unitId == Guid.Empty)
         {
             throw new ArgumentException("UnitId cannot be empty", nameof(unitId));
         }
 
-        return new UnitAccess(userId, unitId);
+        if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("UserId cannot be empty", nameof(userId));
+        }
+
+        return new UserRoleAssignment(userId, unitId, role);
     }
 
     public void SetRole(UserRole role)

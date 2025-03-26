@@ -28,21 +28,41 @@ public static class DependencyInjection
 
         // services.AddScoped<IApplicationDbContext>(provider => provider.GetService<GuiDbContext>());
 
-        services.AddIdentity<IdentityUser, IdentityRole>()
+        services.AddIdentity();
+
+        // services.AddTransient<IDateTime, DateTimeService>();
+
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
+
+
+        return services;
+    }
+
+    public static IServiceCollection AddIdentity(this IServiceCollection services)
+    {
+        services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationContext>()
             .AddDefaultTokenProviders();
 
-        // services.AddTransient<IDateTime, DateTimeService>();
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.Password.RequireDigit = false;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequiredUniqueChars = 1;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = true;
+            options.User.RequireUniqueEmail = true;
+        });
 
         // services.AddDefaultIdentity<IdentityUser>(options =>
         //     options.SignIn.RequireConfirmedAccount = false)
         //     .AddEntityFrameworkStores<ApplicationContext>();
-
-        services.AddScoped<AuthService>();
-
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
-
 
         return services;
     }

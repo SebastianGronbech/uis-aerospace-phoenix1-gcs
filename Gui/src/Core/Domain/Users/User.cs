@@ -7,8 +7,8 @@ public class User : BaseEntity
     public Guid Id { get; protected set; }
     public string Name { get; private set; }
 
-    private readonly HashSet<UnitAccess> _unitAccesses = new();
-    public IReadOnlyCollection<UnitAccess> UnitAccesses => _unitAccesses;
+    private readonly HashSet<UserRoleAssignment> _roles = new();
+    public IReadOnlyCollection<UserRoleAssignment> Roles => _roles;
 
     public DateTimeOffset CreatedAt { get; }
     public DateTimeOffset? UpdatedAt { get; private set; }
@@ -21,7 +21,8 @@ public class User : BaseEntity
         CreatedAt = DateTimeOffset.UtcNow;
     }
 
-    internal static User Create(Guid id, string name)
+    // internal static User Create(Guid id, string name)
+    public static User Create(Guid id, string name)
     {
         if (id == Guid.Empty)
         {
@@ -36,15 +37,24 @@ public class User : BaseEntity
         return new User(id, name);
     }
 
-    public void SetRole(Guid unitId, UserRole role)
+    public void AssignRole(Guid unitId, UserRole role)
     {
-        var unitAccess = _unitAccesses.FirstOrDefault(u => u.UnitId == unitId);
-        if (unitAccess == null)
+        if (!_roles.Any(u => u.UnitId == unitId && u.Role == role))
         {
-            unitAccess = UnitAccess.Create(Id, unitId);
+            var unitAccess = UserRoleAssignment.Create(Id, unitId, role);
+            _roles.Add(unitAccess);
+        }
+    }
+
+    public void UpdateRole(Guid unitId, UserRole role)
+    {
+        var existingRole = _roles.FirstOrDefault(u => u.UnitId == unitId);
+        if (existingRole == null)
+        {
+            throw new InvalidOperationException($"User does not have access to unit with ID {unitId}");
         }
 
-        unitAccess.SetRole(role);
+        existingRole.SetRole(role);
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 }
