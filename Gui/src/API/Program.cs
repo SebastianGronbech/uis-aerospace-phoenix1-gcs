@@ -10,6 +10,8 @@ builder.Services
     .AddCore()
     .AddInfrastructure(builder.Configuration);
 
+builder.Services.AddSignalR();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -27,5 +29,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<Gui.API.Hubs.CustomHub>("/hubs/custom");
 
 app.Run();
