@@ -12,6 +12,16 @@ builder.Services
 
 builder.Services.AddSignalR();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+    // .AllowCredentials());
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -31,5 +41,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<Gui.API.Hubs.CustomHub>("/hubs/custom");
+
+app.UseCors("CorsPolicy");
 
 app.Run();
