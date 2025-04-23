@@ -1,28 +1,51 @@
-import { useEffect, useRef, useState } from "react";
-import { HubConnectionBuilder, HubConnection } from "@microsoft/signalr";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
-export const useSignalR = (url, options) => {
-    const [connection, setConnection] = useState(null);
-    const [error, setError] = useState(null);
-    const [isConnected, setIsConnected] = useState(false);
+export const useSignalR = ({
+    hubUrl,
+    accessTokenFactory,
+    withCredentials = false,
+    automaticReconnect = true,
+    configureLogging = "info",
+}) => {
     const connectionRef = useRef(null);
+    const [connected, setConnected] = useState(false);
+    const [error, setError] = useState(null);
+
+    const connect = useCallback(async () => {
+        try {
+            const connection = new HubConnectionBuilder()
+                .withUrl(hubUrl, {
+                    accessTokenFactory,
+                    withCredentials,
+                })
+                .withAutomaticReconnect(automaticReconnect)
+                .configureLogging(configureLogging)
+                .build();
+
+            connection.on("ReceiveMessage", (message) => {
+                console.log("Received message:", message);
+            });
+
+            connection.onclose(() => {
+                setConnected(false);
+            });
+
+            await connection.start();
+            setConnected(true);
+            connectionRef.current = connection;
+        } catch (err) {
+            setError(err);
+        }
+    }, [
+        hubUrl,
+        accessTokenFactory,
+        withCredentials,
+        automaticReconnect,
+        configureLogging,
+    ]);
 
     useEffect(() => {
-        const connect = async () => {
-            try {
-                const newConnection = new HubConnectionBuilder()
-                    .withUrl(url, options)
-                    // .withAutomaticReconnect()
-                    .build();
-
-                await newConnection.start();
-                setConnection(newConnection);
-                setIsConnected(true);
-            } catch (err) {
-                setError(err);
-            }
-        };
-
         connect();
 
         return () => {
@@ -30,24 +53,7 @@ export const useSignalR = (url, options) => {
                 connectionRef.current.stop();
             }
         };
-    }, [url, options]);
+    }, [connect]);
 
-    useEffect(() => {
-        if (connection) {
-            connectionRef.current = connection;
-
-            connection.onclose(() => {
-                setIsConnected(false);
-            });
-
-            connection.onreconnecting(() => {
-                setIsConnected(false);
-            });
-
-            connection.onreconnected(() => {
-                setIsConnected(true);
-            });
-        }
-    }, [connection]);
-    return { connection, error, isConnected };
+    return { connection: connectionRef.current, connected, error };
 };

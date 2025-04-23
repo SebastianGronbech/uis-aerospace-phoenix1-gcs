@@ -21,18 +21,19 @@ ChartJS.register(
 );
 
 export const TelemetryChart = ({ telemetryData }) => {
+    console.log(telemetryData?.map((data) => data.timestamp));
     const chartData = {
-        labels: telemetryData.map((data) => data.timestamp),
+        labels: telemetryData?.map((data) => data.timestamp),
         datasets: [
             {
                 label: "Speed",
-                data: telemetryData.map((data) => data.speed),
+                data: telemetryData?.map((data) => data.speed),
                 borderColor: "rgba(75, 192, 192, 1)",
                 backgroundColor: "rgba(75, 192, 192, 0.2)",
             },
             {
                 label: "RPM",
-                data: telemetryData.map((data) => data.rpm),
+                data: telemetryData?.map((data) => data.rpm),
                 borderColor: "rgba(153, 102, 255, 1)",
                 backgroundColor: "rgba(153, 102, 255, 0.2)",
             },

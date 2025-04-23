@@ -16,10 +16,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
         builder => builder
-            .AllowAnyOrigin()
+            // .AllowAnyOrigin()
+            .WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
-            .AllowAnyHeader());
-    // .AllowCredentials());
+            .AllowAnyHeader()
+            .AllowCredentials());
 });
 
 builder.Services.AddControllers();
@@ -36,12 +37,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseCors("CorsPolicy");
+
+// app.UseAuthorization();
 
 app.MapControllers();
 
 app.MapHub<Gui.API.Hubs.CustomHub>("/hubs/custom");
 
-app.UseCors("CorsPolicy");
 
 app.Run();

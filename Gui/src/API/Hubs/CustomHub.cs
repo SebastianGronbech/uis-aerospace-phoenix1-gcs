@@ -14,8 +14,16 @@ public class CustomHub : Hub
     public override Task OnConnectedAsync()
     {
         _logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
+
+        var data = new
+        {
+            Timestamp = DateTime.UtcNow,
+            Speed = 22424.2,
+            RPM = 23424.2
+        };
         // You can also send a message to the client that just connected
-        Clients.Caller.SendAsync("ReceiveMessage", "Welcome to the hub!");
+        // Clients.Caller.SendAsync("ReceiveMessage", "Welcome to the hub!");
+        Clients.Caller.SendAsync("ReceiveMessage", data);
         return base.OnConnectedAsync();
     }
 
@@ -23,5 +31,12 @@ public class CustomHub : Hub
     {
         _logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
         return base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task ReceiveTelemetryData(string message)
+    {
+        _logger.LogInformation("Received message: {Message}", message);
+        // Broadcast the message to all connected clients
+        await Clients.All.SendAsync("ReceiveTelemetryData", message);
     }
 }

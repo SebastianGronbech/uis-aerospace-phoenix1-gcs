@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 import { AuthProvider } from "@/features/auth/AuthContext";
 
 import LoginPage from "@/features/auth/pages/loginPage";
-import TelemetryDashboard from "../features/telemetry/pages/TelemetryPage";
+import TelemetryDashboard from "@/features/telemetry/pages/TelemetryPage";
 
 function App() {
     return (
