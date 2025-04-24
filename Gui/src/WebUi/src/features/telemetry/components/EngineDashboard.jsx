@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTelemetryHub } from "../hooks/useTelemetryHub";
 import { TelemetryChart } from "./TelemetryChart";
-import { useSignalR } from "@/hooks/useSignalR";
+import { useSignalR } from "@/shared/hooks/useSignalR";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 // export const EngineDashboard = () => {
@@ -73,18 +73,86 @@ export const EngineDashboard = () => {
 
     // joinHub();
 
-    const [data, setData] = useState(null);
+    // const [data, setData] = useState(null);
 
-    // Use the enhanced SignalR hook with message handlers
-    const { connected, error, sendCommand } = useSignalR({
-        hubUrl: `${import.meta.env.VITE_API_URL}/hubs/custom`,
-        messageHandlers: {
-            ReceiveMessage: (receivedData) => {
-                setData(receivedData);
-                console.log("Received telemetry data:", receivedData);
-            },
-        },
-    });
+    // // Use the enhanced SignalR hook with message handlers
+    // const { connected, error, sendCommand } = useSignalR({
+    //     hubUrl: `${import.meta.env.VITE_API_URL}/hubs/custom`,
+    //     messageHandlers: {
+    //         ReceiveMessage: (receivedData) => {
+    //             setData(receivedData);
+    //             console.log("Received telemetry data:", receivedData);
+    //         },
+    //     },
+    // });
+
+    const [connected, setConnected] = useState(false);
+    const [data, setData] = useState(null);
+    const [chartData, setChartData] = useState([]);
+    const connectionRef = useRef(null);
+
+    // Setup SignalR connection
+    useEffect(() => {
+        // Create the connection
+        const connection = new HubConnectionBuilder()
+            .withUrl(`${import.meta.env.VITE_API_URL}/hubs/custom`)
+            .withAutomaticReconnect()
+            .configureLogging("info")
+            .build();
+
+        // Handle incoming telemetry data
+        connection.on("ReceiveMessage", (receivedData) => {
+            console.log("Received telemetry data:", receivedData);
+            setData(receivedData);
+
+            // Update chart data
+            if (receivedData) {
+                // If receivedData is an array, add all items, otherwise add as single item
+                const newData = Array.isArray(receivedData)
+                    ? receivedData
+                    : [receivedData];
+
+                setChartData((prevData) => {
+                    const combined = [...prevData, ...newData];
+                    // Optionally limit the number of data points to prevent memory issues
+                    return combined.length > 100
+                        ? combined.slice(-100)
+                        : combined;
+                });
+            }
+        });
+
+        // Connection status handling
+        connection.onclose(() => {
+            console.log("SignalR connection closed");
+            setConnected(false);
+        });
+
+        // Start the connection
+        const startConnection = async () => {
+            try {
+                await connection.start();
+                console.log("SignalR connection established");
+                setConnected(true);
+            } catch (err) {
+                console.error("Error establishing SignalR connection:", err);
+                // Retry connection after delay
+                setTimeout(startConnection, 5000);
+            }
+        };
+
+        startConnection();
+
+        // Store connection in ref for use in sendCommand
+        connectionRef.current = connection;
+
+        // Clean up on unmount
+        return () => {
+            if (connection) {
+                connection.stop();
+            }
+        };
+    }, []);
 
     return (
         <div className="p-4">
@@ -121,8 +189,8 @@ export const EngineDashboard = () => {
                             Telemetry Chart
                         </h2>
 
-                        {data && data.length > 0 && (
-                            <TelemetryChart telemetryData={data} />
+                        {chartData && chartData.length > 0 && (
+                            <TelemetryChart telemetryData={chartData} />
                         )}
                         {/* <TelemetryChart telemetryData={data} /> */}
                     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSignalR } from "@/hooks/useSignalR";
+import { useSignalR } from "@/shared/hooks/useSignalR";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
