@@ -1,13 +1,14 @@
 import "./App.css";
 import { Route, Routes } from "react-router";
 
+import Header from "@/features/header/components/Header";
 import LoginPage from "@/features/auth/pages/loginPage";
 import TelemetryDashboard from "../features/telemetry/pages/TelemetryPage";
 
 function App() {
     return (
         <>
-            {/* <Header /> */}
+            <Header />
 
             <Routes>
                 <Route index element={<LoginPage />} />
