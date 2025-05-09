@@ -4,6 +4,7 @@ import { AuthProvider } from "@/features/auth/AuthContext";
 
 import LoginPage from "@/features/auth/pages/loginPage";
 import TelemetryDashboard from "@/features/telemetry/pages/TelemetryPage";
+import TelemetryGUI from "../features/telemetry/components/gui";
 
 function App() {
     return (
@@ -12,6 +13,8 @@ function App() {
                 <Routes>
                     <Route index element={<LoginPage />} />
                     <Route path="/login" element={<LoginPage />} />
+
+                    <Route path="/dashboard" element={<TelemetryGUI />} />
 
                     <Route path="/telemetry" element={<TelemetryDashboard />} />
                 </Routes>
