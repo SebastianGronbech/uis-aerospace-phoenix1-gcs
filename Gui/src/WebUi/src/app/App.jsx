@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 import { AuthProvider } from "@/features/auth/AuthContext";
 
 import LoginPage from "@/features/auth/pages/loginPage";
-import TelemetryDashboard from "@/features/telemetry/pages/TelemetryPage";
 import TelemetryGUI from "../features/telemetry/components/gui";
 
 function App() {
@@ -15,8 +14,6 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
 
                     <Route path="/dashboard" element={<TelemetryGUI />} />
-
-                    <Route path="/telemetry" element={<TelemetryDashboard />} />
                 </Routes>
             </Router>
         </AuthProvider>
