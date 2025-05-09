@@ -9,7 +9,7 @@ import {
     Tooltip,
     Legend,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import ChartCard from "../components/ChartCard";
 
 ChartJS.register(
     CategoryScale,
@@ -51,37 +51,44 @@ export default function TelemetryPage() {
         <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-6 md:col-span-2">
-                    <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 h-64">
-                        <p className="font-semibold">RSSI</p>
-                        <div className="h-56">
-                            <Line options={chartOptions} data={dummyData} />
-                        </div>
-                    </div>
+                    <ChartCard
+                        title={"RSSI"}
+                        chartData={dummyData}
+                        chartOptions={chartOptions}
+                    />
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 h-60">
-                            <p className="font-semibold">SNR</p>
-                            <div className="h-52">
-                                <Line options={chartOptions} data={dummyData} />
-                            </div>
-                        </div>
-                        <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 h-60">
-                            <p className="font-semibold">PL</p>
-                            <div className="h-52">
-                                <Line options={chartOptions} data={dummyData} />
-                            </div>
-                        </div>
-                        <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 h-60">
-                            <p className="font-semibold">Sendt</p>
-                            <div className="h-52">
-                                <Line options={chartOptions} data={dummyData} />
-                            </div>
-                        </div>
-                        <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 h-60">
-                            <p className="font-semibold">Mottatt</p>
-                            <div className="h-52">
-                                <Line options={chartOptions} data={dummyData} />
-                            </div>
-                        </div>
+                        <ChartCard
+                            title={"SNR"}
+                            chartData={dummyData}
+                            chartOptions={chartOptions}
+                            cardHeight="h-60"
+                            chartHeight="h-52"
+                        />
+
+                        <ChartCard
+                            title={"PL"}
+                            chartData={dummyData}
+                            chartOptions={chartOptions}
+                            cardHeight="h-60"
+                            chartHeight="h-52"
+                        />
+
+                        <ChartCard
+                            title={"Sendt"}
+                            chartData={dummyData}
+                            chartOptions={chartOptions}
+                            cardHeight="h-60"
+                            chartHeight="h-52"
+                        />
+
+                        <ChartCard
+                            title={"Mottatt"}
+                            chartData={dummyData}
+                            chartOptions={chartOptions}
+                            cardHeight="h-60"
+                            chartHeight="h-52"
+                        />
                     </div>
                 </div>
 
@@ -113,6 +120,7 @@ export default function TelemetryPage() {
                             </div>
                         </div>
                     </div>
+
                     <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800">
                         <p className="font-semibold">
                             Brukt av telemetrilink [%]
