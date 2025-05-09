@@ -5,15 +5,16 @@ export default function ChartCard({
     title,
     chartData,
     chartOptions,
-    cardHeight = "h-64",
-    chartHeight = "h-56",
+    cardHeight,
 }) {
     return (
         <div
-            className={`border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 ${cardHeight}`}
+            className={`border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800 flex flex-col flex-grow ${
+                cardHeight || ""
+            }`}
         >
             <p className="font-semibold">{title}</p>
-            <div className={`${chartHeight}`}>
+            <div className="h-full">
                 <Line options={chartOptions} data={chartData} />
             </div>
         </div>

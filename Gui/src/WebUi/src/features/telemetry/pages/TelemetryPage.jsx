@@ -10,6 +10,8 @@ import {
     Legend,
 } from "chart.js";
 import ChartCard from "../components/ChartCard";
+import ModuleCard from "../components/ModuleCard";
+import UsageBar from "../components/UsageBar";
 
 ChartJS.register(
     CategoryScale,
@@ -33,6 +35,36 @@ const dummyData = {
     ],
 };
 
+const sendtData = {
+    labels: Array.from({ length: 10 }, (_, i) => `Time ${i}`), // Or your actual time labels
+    datasets: [
+        {
+            label: "Ground Module Sent",
+            data: [10, 12, 15, 13, 16, 18, 20, 17, 19, 22], // Example data for ground sent
+            borderColor: "#3b82f6", // Blue
+            backgroundColor: "rgba(59, 130, 246, 0.2)",
+            tension: 0.1,
+        },
+        {
+            label: "Rocket Module Sent",
+            data: [8, 9, 11, 10, 13, 14, 15, 12, 14, 17], // Example data for rocket sent
+            borderColor: "#10b981", // Green
+            backgroundColor: "rgba(16, 185, 129, 0.2)",
+            tension: 0.1,
+        },
+    ],
+};
+
+const groundStatuses = [
+    { label: "Running", isOn: true },
+    { label: "Not Frozen Indicator", isOn: true },
+    { label: "Node Indicator", isOn: true },
+    { label: "canRx not full", isOn: true },
+    { label: "canTx not full", isOn: true },
+    { label: "serial tx not full", isOn: false }, // Example of an "off" status
+    { label: "serial rx not full", isOn: true },
+];
+
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false, // Allow charts to fill container height
@@ -44,95 +76,84 @@ const chartOptions = {
             display: false,
         },
     },
+    scales: {
+        x: {
+            ticks: {
+                color: "#ffffff",
+            },
+            grid: {
+                color: "rgba(255, 255, 255, 0.1)", // Darker grid lines
+            },
+        },
+        y: {
+            ticks: {
+                color: "#ffffff",
+            },
+            grid: {
+                color: "rgba(255, 255, 255, 0.1)", // Darker grid lines
+            },
+        },
+    },
 };
 
 export default function TelemetryPage() {
     return (
-        <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-6 md:col-span-2">
+        <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen flex flex-col">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
+                <div className="space-y-6 md:col-span-2 flex flex-col">
                     <ChartCard
-                        title={"RSSI"}
+                        title={"RSSI - Received Signal Strength Indicator"}
                         chartData={dummyData}
                         chartOptions={chartOptions}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 grid-rows-4 md:grid-rows-2 md:grid-cols-2 gap-6 flex-grow">
                         <ChartCard
-                            title={"SNR"}
+                            title={"SNR - Signal to Noise Ratio"}
                             chartData={dummyData}
                             chartOptions={chartOptions}
-                            cardHeight="h-60"
-                            chartHeight="h-52"
                         />
 
                         <ChartCard
-                            title={"PL"}
+                            title={"PL - Packet Loss"}
                             chartData={dummyData}
                             chartOptions={chartOptions}
-                            cardHeight="h-60"
-                            chartHeight="h-52"
                         />
 
                         <ChartCard
-                            title={"Sendt"}
-                            chartData={dummyData}
+                            title={"Sent"}
+                            chartData={sendtData}
                             chartOptions={chartOptions}
-                            cardHeight="h-60"
-                            chartHeight="h-52"
                         />
 
                         <ChartCard
                             title={"Mottatt"}
-                            chartData={dummyData}
+                            chartData={sendtData}
                             chartOptions={chartOptions}
-                            cardHeight="h-60"
-                            chartHeight="h-52"
                         />
                     </div>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800">
-                        <p className="font-semibold">Pakker Mottatt / Sendt</p>
-                        <p>Navn ............ Antall</p>
-                        <p> - ................. 502</p>
-                        <p> - ................. 605</p>
-                    </div>
-                    <div className="space-y-2">
-                        <button className="w-full bg-gray-200 dark:bg-gray-700 rounded py-2 font-semibold text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            Reset
-                        </button>
-                        <button className="w-full bg-gray-200 dark:bg-gray-700 rounded py-2 font-semibold text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            Init
-                        </button>
-                    </div>
-                    <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800">
-                        <p className="font-semibold">Status</p>
-                        <div className="flex flex-col space-y-1 pl-2">
-                            <div className="flex items-center space-x-2">
-                                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                                <span>Navn</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                                <span>Communication</span>
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid md:grid-cols-2 gap-6 md:grid-rows-[auto_1fr]">
+                    <ModuleCard
+                        moduleTitle={"Ground Module"}
+                        packetStatsData={sendtData}
+                        onReset={() => console.log("Reset Ground")}
+                        statusItems={groundStatuses}
+                    />
 
-                    <div className="border dark:border-gray-700 rounded-2xl shadow p-4 bg-white dark:bg-gray-800">
-                        <p className="font-semibold">
-                            Brukt av telemetrilink [%]
-                        </p>
-                        <div className="w-full h-40 border dark:border-gray-600 relative mt-2">
-                            <div
-                                className="absolute bottom-0 w-full bg-blue-500 text-center text-white text-sm"
-                                style={{ height: "75%" }}
-                            >
-                                75%
-                            </div>
-                        </div>
+                    <ModuleCard
+                        moduleTitle={"Rocket Module"}
+                        packetStatsData={sendtData}
+                        onReset={() => console.log("Reset Ground")}
+                        statusItems={groundStatuses}
+                    />
+
+                    <div className="md:col-span-2">
+                        <UsageBar
+                            title={"Telemetrilink Utnyttelse [%]"}
+                            usagePercentage={75}
+                        />
                     </div>
                 </div>
             </div>
