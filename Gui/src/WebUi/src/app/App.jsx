@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 import { AuthProvider } from "@/features/auth/AuthContext";
 
 import LoginPage from "@/features/auth/pages/loginPage";
-import TelemetryGUI from "../features/telemetry/components/gui";
+import TelemetryPage from "@/features/telemetry/pages/TelemetryPage";
 
 function App() {
     return (
@@ -13,7 +13,7 @@ function App() {
                     <Route index element={<LoginPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
-                    <Route path="/dashboard" element={<TelemetryGUI />} />
+                    <Route path="/telemetry" element={<TelemetryPage />} />
                 </Routes>
             </Router>
         </AuthProvider>

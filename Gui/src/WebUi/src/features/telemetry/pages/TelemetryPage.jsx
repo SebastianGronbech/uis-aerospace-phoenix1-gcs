@@ -46,7 +46,7 @@ const chartOptions = {
     },
 };
 
-export default function TelemetryGUI() {
+export default function TelemetryPage() {
     return (
         <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
