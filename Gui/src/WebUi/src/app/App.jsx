@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router";
 
 import Header from "@/features/header/components/Header";
 import LoginPage from "@/features/auth/pages/loginPage";
-import TelemetryDashboard from "../features/telemetry/pages/TelemetryPage";
+import TelemetryPage from "@/features/telemetry/pages/TelemetryPage";
 
 function App() {
     return (
@@ -14,7 +14,7 @@ function App() {
                 <Route index element={<LoginPage />} />
                 <Route path="/login" element={<LoginPage />} />
 
-                <Route path="/telemetry" element={<TelemetryDashboard />} />
+                <Route path="/telemetry" element={<TelemetryPage />} />
             </Routes>
 
             {/* <Footer /> */}
