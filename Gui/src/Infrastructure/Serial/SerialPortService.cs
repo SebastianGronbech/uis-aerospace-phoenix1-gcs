@@ -26,7 +26,7 @@ namespace Gui.Infrastructure.Serial
                         Encoding.UTF8);
                 }
 
-                string hex = string.Join(",", payload.ToArray().Select(b => b.ToString("X2")));
+                string hex = string.Join(",", payload.Select(b => b.ToString("X2")));
                 string now = DateTime.UtcNow.ToString("o");
                 string ts = mcuTimestamp ?? "";
 
@@ -37,132 +37,179 @@ namespace Gui.Infrastructure.Serial
         }
     }
 
-
-
     // ──────────────────────────────────────── Serial Service ───────────────────────────────────────
     /// <summary>
     /// Opens the serial port on demand, listens forever, and sends commands immediately.
     /// </summary>
     public sealed class SerialPortService : BackgroundService, IPortSender
-{
-    private readonly string _com = "COM3";
-    private readonly int _baud = 115200;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public SerialPortService(IServiceScopeFactory scopeFactory)
     {
-        _scopeFactory = scopeFactory;
-    }
+        private readonly string _com = "COM6";
+        private readonly int _baud = 115200;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-    private SerialPort? _sp;
-    private readonly SemaphoreSlim _initLock = new(1, 1);
-    private readonly SemaphoreSlim _txLock = new(1, 1);
-
-    private void EnsurePortOpen()
-    {
-        if (_sp is { IsOpen: true }) return;
-
-        _initLock.Wait();
-        try
+        public SerialPortService(IServiceScopeFactory scopeFactory)
         {
-            if (_sp is { IsOpen: true }) return;
-
-            _sp ??= new SerialPort(_com, _baud)
-            {
-                DtrEnable = true,
-                Encoding = Encoding.ASCII
-            };
-            _sp.DataReceived -= OnData;
-            _sp.DataReceived += OnData;
-            _sp.Open();
-            Console.WriteLine($"[Serial] {_com} opened (baud {_baud}).");
+            _scopeFactory = scopeFactory;
         }
-        finally { _initLock.Release(); }
-    }
 
-    private async void OnData(object? s, SerialDataReceivedEventArgs e)
-    {
-        try
+        private SerialPort? _sp;
+        private readonly SemaphoreSlim _initLock = new(1, 1);
+        private readonly SemaphoreSlim _txLock = new(1, 1);
+
+        private void EnsurePortOpen()
         {
-            string raw = _sp!.ReadLine();
-            if (string.IsNullOrWhiteSpace(raw)) return;
-
-            foreach (var line in raw.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            _initLock.Wait();
+            try
             {
-                string trimmed = line.Trim();
-                Console.WriteLine($"[RX] {trimmed}");
-
-                var parts = trimmed.Split(',');
-
-                if (parts.Length < 9 || parts.Length > 10)
+                if (_sp == null)
                 {
-                    Console.WriteLine($"[RX] Skipped: expected 9 or 10 fields, got {parts.Length}");
-                    continue;
-                }
-
-                if (!int.TryParse(parts[0], out var canId))
-                {
-                    Console.WriteLine($"[RX] Skipped: invalid CAN ID '{parts[0]}'");
-                    continue;
-                }
-
-                var bytes = new byte[8];
-                bool valid = true;
-
-                for (int i = 0; i < 8; i++)
-                {
-                    if (!byte.TryParse(parts[i + 1], System.Globalization.NumberStyles.HexNumber, null, out bytes[i]))
+                    _sp = new SerialPort(_com, _baud)
                     {
-                        Console.WriteLine($"[RX] Skipped: invalid byte at B{i}: '{parts[i + 1]}'");
-                        valid = false;
-                        break;
-                    }
+                        DtrEnable = true,
+                        Encoding = Encoding.ASCII
+                    };
+                    _sp.DataReceived += OnData;
                 }
 
-                if (!valid) continue;
+                if (_sp.IsOpen)
+                {
+                    Console.WriteLine($"[Serial] Port {_com} is already open.");
+                    return;
+                }
 
-                string timestamp = (parts.Length == 10) ? parts[9].Trim() : DateTime.UtcNow.ToString("o");
-
-                // 🔁 Resolve CanService via scope
-                using var scope = _scopeFactory.CreateScope();
-                var canService = scope.ServiceProvider.GetRequiredService<CanService>();
-                await canService.ProcessCanMessageAsync(canId, bytes, DateTime.UtcNow);
-
-                await CsvLogger.AppendAsync(canId, bytes, timestamp);
+                Console.WriteLine($"[Serial] Opening port {_com}...");
+                _sp.Open();
+                Console.WriteLine($"[Serial] {_com} opened (baud {_baud}).");
+            }
+            finally
+            {
+                _initLock.Release();
             }
         }
-        catch (Exception ex)
+
+        
+
+private readonly StringBuilder _serialBuffer = new();
+
+private void OnData(object? sender, SerialDataReceivedEventArgs e)
+{
+    try
+    {
+        string incoming = _sp!.ReadExisting();
+        _serialBuffer.Append(incoming);
+
+        while (true)
         {
-            Console.WriteLine($"[RX] Error: {ex.Message}");
+            string buffer = _serialBuffer.ToString();
+            int newlineIndex = buffer.IndexOfAny(new[] { '\n', '\r' });
+
+            if (newlineIndex == -1)
+                break;
+
+            string line = buffer.Substring(0, newlineIndex).Trim();
+            _serialBuffer.Remove(0, newlineIndex + 1);
+
+            if (!string.IsNullOrWhiteSpace(line))
+            {
+                _ = ProcessLineAsync(line);
+            }
+        }
+
+        // Handle final line if there's no newline but it looks complete
+        if (_serialBuffer.Length > 0)
+        {
+            string maybeLine = _serialBuffer.ToString().Trim();
+            var parts = maybeLine.Split(',');
+            if (parts.Length >= 9)
+            {
+                _serialBuffer.Clear();
+                _ = ProcessLineAsync(maybeLine);
+            }
         }
     }
-
-    public async Task SendAsync(Command cmd)
+    catch (Exception ex)
     {
-        EnsurePortOpen();
+        Console.WriteLine($"[RX] Error in OnData: {ex.Message}");
+    }
+}
 
-        await _txLock.WaitAsync();
-        try
+
+
+        private async Task ProcessLineAsync(string trimmed)
         {
-            var msg = cmd.ToMessage();
-            _sp!.Write(msg, 0, msg.Length);
-            Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
+            Console.WriteLine($"[RX] {trimmed}");
 
-            byte[] payloadBytes = BitConverter.GetBytes(cmd.Payload);
-            Array.Reverse(payloadBytes);
-            await CsvLogger.AppendAsync(cmd.CanId, payloadBytes);
+            var parts = trimmed.Split(',');
+
+            if (parts.Length < 9 || parts.Length > 10)
+            {
+                Console.WriteLine($"[RX] Skipped: expected 9 or 10 fields, got {parts.Length}");
+                return;
+            }
+
+            if (!int.TryParse(parts[0], out var canId))
+            {
+                Console.WriteLine($"[RX] Skipped: invalid CAN ID '{parts[0]}'");
+                return;
+            }
+
+            var bytes = new byte[8];
+            for (int i = 0; i < 8; i++)
+            {
+                if (!byte.TryParse(parts[i + 1], System.Globalization.NumberStyles.HexNumber, null, out bytes[i]))
+                {
+                    Console.WriteLine($"[RX] Skipped: invalid byte at B{i}: '{parts[i + 1]}'");
+                    return;
+                }
+            }
+
+            string timestamp = (parts.Length == 10) ? parts[9].Trim() : DateTime.UtcNow.ToString("o");
+
+            using var scope = _scopeFactory.CreateScope();
+            var canService = scope.ServiceProvider.GetRequiredService<CanService>();
+            await canService.ProcessCanMessageAsync(canId, bytes, DateTime.UtcNow);
+            await CsvLogger.AppendAsync(canId, bytes, timestamp);
         }
-        finally { _txLock.Release(); }
-    }
 
-    protected override Task ExecuteAsync(CancellationToken _) => Task.CompletedTask;
+        public async Task SendAsync(Command cmd)
+        {
+            EnsurePortOpen();
 
-    public override void Dispose()
-    {
-        _sp?.Close();
-        _sp?.Dispose();
-        base.Dispose();
+            await _txLock.WaitAsync();
+            try
+            {
+                var msg = cmd.ToMessage();
+                _sp!.Write(msg, 0, msg.Length);
+                Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
+
+                byte[] payloadBytes = BitConverter.GetBytes(cmd.Payload);
+                Array.Reverse(payloadBytes);
+                await CsvLogger.AppendAsync(cmd.CanId, payloadBytes);
+            }
+            finally { _txLock.Release(); }
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            EnsurePortOpen();
+
+            return Task.Run(async () =>
+            {
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    await Task.Delay(1000, stoppingToken);
+                }
+            }, stoppingToken);
+        }
+
+        public override void Dispose()
+        {
+            Console.WriteLine("Port is closing");
+            _sp?.Close();
+            _sp?.Dispose();
+            base.Dispose();
+        }
     }
 }
-}
+
 
