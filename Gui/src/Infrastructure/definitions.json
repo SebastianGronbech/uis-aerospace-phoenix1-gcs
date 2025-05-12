@@ -1,0 +1,621 @@
+[
+    {
+        "Name": "ECUPressures",
+        "Id": 101,
+        "Signals": [
+            {
+                "Name": "N2O",
+                "StartBit": 0,
+                "Length": 8,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "ETH",
+                "StartBit": 8,
+                "Length": 8,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "OxIn",
+                "StartBit": 16,
+                "Length": 8,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "FulIn",
+                "StartBit": 24,
+                "Length": 8,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "ECUTemperaturesLines",
+        "Id": 102,
+        "Signals": [
+            {
+                "Name": "N2O",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "ETH",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUTemperaturesInjector",
+        "Id": 103,
+        "Signals": [
+            {
+                "Name": "OxIn",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "FulIn",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUTemperaturesWallsAndNozzles",
+        "Id": 104,
+        "Signals": [
+            {
+                "Name": "W1",
+                "StartBit": 0,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "W2",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "W3",
+                "StartBit": 32,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "W4",
+                "StartBit": 48,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "ECUFlow",
+        "Id": 105,
+        "Signals": [
+            {
+                "Name": "N2O",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "ETH",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUPropellantConsumption",
+        "Id": 106,
+        "Signals": [
+            {
+                "Name": "Ox",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Fuel",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUServomotorsTemperature",
+        "Id": 107,
+        "Signals": [
+            {
+                "Name": "M1",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "M2",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUServomotorsCurrent",
+        "Id": 108,
+        "Signals": [
+            {
+                "Name": "M1",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "M2",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUValvesPosition",
+        "Id": 109,
+        "Signals": [
+            {
+                "Name": "Ox",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Fuel",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUPIDOx",
+        "Id": 110,
+        "Signals": [
+            {
+                "Name": "Error",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Integrator",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUPIDFuel",
+        "Id": 111,
+        "Signals": [
+            {
+                "Name": "Error",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Integrator",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUMixtureRatio",
+        "Id": 112,
+        "Signals": [
+            {
+                "Name": "Desired",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Measured",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+
+    {
+        "Name": "TelemetryRocketStatus",
+        "Id": 300,
+        "Signals": [
+            {
+                "Name": "IsRunning",
+                "StartBit": 0,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsFrozen",
+                "StartBit": 1,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsNode",
+                "StartBit": 2,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCanRxFull",
+                "StartBit": 3,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCanTxFull",
+                "StartBit": 4,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsSerialTxFull",
+                "StartBit": 5,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsSerialRxFull",
+                "StartBit": 6,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "LostPackages",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "TimeSinceBoot",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryRocketSignalQuality",
+        "Id": 301,
+        "Signals": [
+            {
+                "Name": "SNR",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "RSSI",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryRocketMessageCounters",
+        "Id": 302,
+        "Signals": [
+            {
+                "Name": "downlink",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "uplink",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryRocketBufferMeasurement",
+        "Id": 303,
+        "Signals": [
+            {
+                "Name": "CanRx",
+                "StartBit": 0,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "CanTx",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "SerialRx",
+                "StartBit": 32,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "SerialTx",
+                "StartBit": 48,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+
+    {
+        "Name": "TelemetryGroundStatus",
+        "Id": 320,
+        "Signals": [
+            {
+                "Name": "IsRunning",
+                "StartBit": 0,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsFrozen",
+                "StartBit": 1,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsNode",
+                "StartBit": 2,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCanRxFull",
+                "StartBit": 3,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCanTxFull",
+                "StartBit": 4,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsSerialTxFull",
+                "StartBit": 5,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsSerialRxFull",
+                "StartBit": 6,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "LostPackages",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "TimeSinceBoot",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryGroundSignalQuality",
+        "Id": 321,
+        "Signals": [
+            {
+                "Name": "SNR",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "RSSI",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryGroundMessageCounters",
+        "Id": 322,
+        "Signals": [
+            {
+                "Name": "downlink",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "uplink",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "TelemetryGroundBufferMeasurement",
+        "Id": 323,
+        "Signals": [
+            {
+                "Name": "CanRx",
+                "StartBit": 0,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "CanTx",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "SerialRx",
+                "StartBit": 32,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "SerialTx",
+                "StartBit": 48,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+
+    {
+        "Name": "BlackBoxStatus",
+        "Id": 400,
+        "Signals": [
+            {
+                "Name": "CAM1Power",
+                "StartBit": 0,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "CAM2Power",
+                "StartBit": 1,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "CAM3Power",
+                "StartBit": 2,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCAM1Recording",
+                "StartBit": 3,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCAM2Recording",
+                "StartBit": 4,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsCAM3Recording",
+                "StartBit": 5,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "IsReceivingCANData",
+                "startBit": 6,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            },
+            {
+                "Name": "CSMURecording",
+                "StartBit": 7,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "bool"
+            }
+        ]
+    }
+]
