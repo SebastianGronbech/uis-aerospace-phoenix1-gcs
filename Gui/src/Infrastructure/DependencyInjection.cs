@@ -6,6 +6,7 @@ using Gui.Infrastructure.Identity;
 using Gui.Infrastructure.Persistence;
 using Gui.Infrastructure.Repositories;
 using Gui.Infrastructure.Serial;
+using InfluxDB.Client;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,13 +40,32 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
         services.AddScoped<ICommandRepository, EfCommandRepository>();
-services.AddHostedService<SerialPortService>();
-services.AddScoped<IPortSender, SerialPortService>(); // Allows injection into handlers
-services.AddScoped<ICreateCommandRepository, EfCreateCommandRepository>();
-services.AddScoped<IDeleteCommandRepository, EfDeleteCommandRepository>();
-services.AddScoped<CanService>();  
+        services.AddSingleton<SerialPortService>();
+        services.AddSingleton<IPortSender>(provider => provider.GetRequiredService<SerialPortService>());
+        services.AddHostedService(provider => provider.GetRequiredService<SerialPortService>());
+        services.AddScoped<ICreateCommandRepository, EfCreateCommandRepository>();
+        services.AddScoped<IDeleteCommandRepository, EfDeleteCommandRepository>();
+        services.AddScoped<CanService>();
         services.AddSingleton<IMessageRepository, MessageRepository>();
         // services.AddScoped<ISignalMeasurementRepository, SignalMeasurementRepository>();
+
+        var influxDb = configuration.GetSection("InfluxDb");
+        var influxDbUrl = influxDb["Url"];
+        var influxDbToken = influxDb["Token"];
+        var influxDbOrg = influxDb["Org"];
+        var influxDbBucket = influxDb["Bucket"];
+
+        services.AddSingleton(new InfluxDBClient(
+            influxDbUrl,
+            influxDbToken));
+
+        services.AddScoped<ISignalMeasurementRepository>(provider =>
+        {
+            var client = provider.GetRequiredService<InfluxDBClient>();
+            var bucket = influxDbBucket!;
+            var org = influxDbOrg!;
+            return new SignalMeasurementRepository(client, bucket, org);
+        });
 
         return services;
     }

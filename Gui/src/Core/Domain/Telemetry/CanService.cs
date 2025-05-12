@@ -3,21 +3,21 @@ namespace Gui.Core.Domain.Telemetry;
 public class CanService
 {
     private readonly IMessageRepository _messageRepository;
-    // private readonly ISignalMeasurementRepository _signalMeasurementRepository;
+    private readonly ISignalMeasurementRepository _signalMeasurementRepository;
     // private readonly ISubSystemNotifier _subSystemNotifier;
     // private readonly ITelemetryNotifier _telemetryNotifier;
 
     public CanService(
-        IMessageRepository messageRepository
+        IMessageRepository messageRepository,
+        ISignalMeasurementRepository signalMeasurementRepository
         // ISubSystemNotifier subSystemNotifier,
         // ITelemetryNotifier telemetryNotifier,
-        // ISignalMeasurementRepository signalMeasurementRepository
         )
     {
         _messageRepository = messageRepository;
+        _signalMeasurementRepository = signalMeasurementRepository;
         // _subSystemNotifier = subSystemNotifier;
         // _telemetryNotifier = telemetryNotifier;
-        // _signalMeasurementRepository = signalMeasurementRepository;
     }
 
     public async Task ProcessCanMessageAsync(int messageId, byte[] frame, DateTime timestamp)
@@ -47,7 +47,7 @@ public class CanService
 
 
 
-        // await _signalMeasurementRepository.AddSignalMeasurementsAsync(signalMeasurements);
+        await _signalMeasurementRepository.AddSignalMeasurementsAsync(signalMeasurements);
 
         // Process the CAN message and notify subscribers
         // await _subSystemNotifier.NotifySubscribersAsync("CAN", "MessageReceived", data);
