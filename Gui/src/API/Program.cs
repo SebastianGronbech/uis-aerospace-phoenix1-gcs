@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials());            
+            .AllowCredentials());
 });
 
 builder.Services.AddMediatR(cfg =>

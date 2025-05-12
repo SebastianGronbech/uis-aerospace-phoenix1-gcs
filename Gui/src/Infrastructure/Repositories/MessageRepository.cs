@@ -24,10 +24,10 @@ public class MessageRepository : IMessageRepository
             };
 
             Console.WriteLine($"Deserializing JSON from {_filePath}...");
-            
+
             var messages = JsonSerializer.Deserialize<List<Message>>(
                 json, options) ?? throw new InvalidOperationException("Failed to deserialize the JSON file.");
-            
+
             Console.WriteLine($"Deserialized {messages.Count} messages.");
 
             return messages?.FirstOrDefault(m => m.Id == id);
