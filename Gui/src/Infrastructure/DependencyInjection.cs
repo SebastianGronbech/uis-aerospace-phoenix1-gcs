@@ -1,8 +1,10 @@
+using Gui.Core.CommandAggregate;
 using Gui.Core.Domain.Users;
 using Gui.Core.SharedKernel;
 using Gui.Infrastructure.Identity;
 using Gui.Infrastructure.Persistence;
 using Gui.Infrastructure.Repositories;
+using Gui.Infrastructure.Serial;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +37,11 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
-
+        services.AddScoped<ICommandRepository, EfCommandRepository>();
+services.AddHostedService<SerialPortService>();
+services.AddSingleton<IPortSender, SerialPortService>(); // Allows injection into handlers
+services.AddScoped<ICreateCommandRepository, EfCreateCommandRepository>();
+services.AddScoped<IDeleteCommandRepository, EfDeleteCommandRepository>();
 
         return services;
     }

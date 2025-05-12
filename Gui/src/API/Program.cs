@@ -1,3 +1,4 @@
+using Gui.Core.CommandAggregate;
 using Gui.Core;
 using Gui.Infrastructure;
 
@@ -20,9 +21,14 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials());
+            .AllowCredentials());            
 });
 
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(SendCommandHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(DeleteCommandHandler).Assembly);
+});
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

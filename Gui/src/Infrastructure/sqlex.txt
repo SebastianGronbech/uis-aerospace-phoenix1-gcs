@@ -1,0 +1,43 @@
+CREATE TABLE users (
+   id INT PRIMARY KEY,
+   username VARCHAR(100) UNIQUE NOT NULL
+   unit_id INT NOT NULL,
+   FOREIGN KEY (unit_id) REFERENCES unit(id)
+);
+
+CREATE TABLE unit (
+   id INT PRIMARY KEY,
+   name VARCHAR(100) UNIQUE NOT NULL;
+
+);
+
+CREATE TABLE roles (
+   id INT PRIMARY KEY,
+   role_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE user_roles (
+   user_id INT NOT NULL,
+   role_id INT NOT NULL,
+   PRIMARY KEY (user_id, role_id),
+   FOREIGN KEY (user_id) REFERENCES users(id),
+   FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE commands (
+   id INT PRIMARY KEY,
+   command_name VARCHAR(255) NOT NULL,
+   command_description TEXT
+   unit_id INT NOT NULL,
+   FOREIGN KEY (unit_id) REFERENCES unit(id)
+   
+);
+
+CREATE TABLE command_executions (
+   id INT PRIMARY KEY,
+   user_id INT NOT NULL,
+   command_id INT NOT NULL,
+   executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (user_id) REFERENCES users(id),
+   FOREIGN KEY (command_id) REFERENCES commands(id)
+);
