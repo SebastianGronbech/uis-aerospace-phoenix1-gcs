@@ -98,7 +98,7 @@ const chartOptions = {
 
 export default function TelemetryPage() {
     return (
-        <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen flex flex-col">
+        <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white flex flex-col h-full">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
                 <div className="space-y-6 md:col-span-2 flex flex-col">
                     <ChartCard

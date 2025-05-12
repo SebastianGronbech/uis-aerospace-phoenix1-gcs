@@ -1,16 +1,38 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { BrowserRouter } from "react-router";
+
+import { createBrowserRouter, RouterProvider } from "react-router";
 import { App } from "./app";
 import { AuthProvider } from "@/features/auth/AuthContext";
 
-createRoot(document.getElementById("root")).render(
-    <StrictMode>
-        <BrowserRouter>
+import LoginPage from "@/features/auth/pages/loginPage";
+import TelemetryPage from "@/features/telemetry/pages/TelemetryPage";
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: (
             <AuthProvider>
                 <App />
             </AuthProvider>
-        </BrowserRouter>
+        ),
+
+        children: [
+            {
+                index: true,
+                element: <LoginPage />,
+            },
+            {
+                path: "/telemetry",
+                element: <TelemetryPage />,
+            },
+        ],
+    },
+]);
+
+createRoot(document.getElementById("root")).render(
+    <StrictMode>
+        <RouterProvider router={router} />
     </StrictMode>
 );
