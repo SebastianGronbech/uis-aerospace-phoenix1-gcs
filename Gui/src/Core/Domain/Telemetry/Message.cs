@@ -2,14 +2,14 @@ namespace Gui.Core.Domain.Telemetry;
 
 public class Message
 {
-    public int Id { get; private set; }
-    public string Name { get; private set; }
-    public IReadOnlyList<Signal> Signals { get; private set; }
+    public int Id { get; }
+    public string Name { get; }
+    public IReadOnlyList<Signal> Signals { get; }
 
-    public Message(int id, string name, IEnumerable<Signal> signals)
+    public Message(int id, string name, IReadOnlyList<Signal> signals)
     {
         Id = id;
         Name = name;
-        Signals = signals.ToList().AsReadOnly();
+        Signals = signals;
     }
 }

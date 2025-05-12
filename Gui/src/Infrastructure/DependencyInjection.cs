@@ -1,4 +1,5 @@
 using Gui.Core.CommandAggregate;
+using Gui.Core.Domain.Telemetry;
 using Gui.Core.Domain.Users;
 using Gui.Core.SharedKernel;
 using Gui.Infrastructure.Identity;
@@ -39,9 +40,12 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
         services.AddScoped<ICommandRepository, EfCommandRepository>();
 services.AddHostedService<SerialPortService>();
-services.AddSingleton<IPortSender, SerialPortService>(); // Allows injection into handlers
+services.AddScoped<IPortSender, SerialPortService>(); // Allows injection into handlers
 services.AddScoped<ICreateCommandRepository, EfCreateCommandRepository>();
 services.AddScoped<IDeleteCommandRepository, EfDeleteCommandRepository>();
+services.AddScoped<CanService>();  
+        services.AddSingleton<IMessageRepository, MessageRepository>();
+        // services.AddScoped<ISignalMeasurementRepository, SignalMeasurementRepository>();
 
         return services;
     }

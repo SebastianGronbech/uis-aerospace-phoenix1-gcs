@@ -3,20 +3,21 @@ namespace Gui.Core.Domain.Telemetry;
 public class CanService
 {
     private readonly IMessageRepository _messageRepository;
-    private readonly ISignalMeasurementRepository _signalMeasurementRepository;
+    // private readonly ISignalMeasurementRepository _signalMeasurementRepository;
     // private readonly ISubSystemNotifier _subSystemNotifier;
     // private readonly ITelemetryNotifier _telemetryNotifier;
 
     public CanService(
-        IMessageRepository messageRepository,
+        IMessageRepository messageRepository
         // ISubSystemNotifier subSystemNotifier,
         // ITelemetryNotifier telemetryNotifier,
-        ISignalMeasurementRepository signalMeasurementRepository)
+        // ISignalMeasurementRepository signalMeasurementRepository
+        )
     {
         _messageRepository = messageRepository;
         // _subSystemNotifier = subSystemNotifier;
         // _telemetryNotifier = telemetryNotifier;
-        _signalMeasurementRepository = signalMeasurementRepository;
+        // _signalMeasurementRepository = signalMeasurementRepository;
     }
 
     public async Task ProcessCanMessageAsync(int messageId, byte[] frame, DateTime timestamp)
@@ -34,6 +35,8 @@ public class CanService
             var decodedValue = DecodeSignal(frame, signal);
 
             var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
+            Console.WriteLine($"Message ID: {messageId}");
+            Console.WriteLine($"Decoded signals {signal.Name} = {decodedValue} at {timestamp}");
 
             signalMeasurements.Add(signalMeasurement);
 
@@ -42,7 +45,9 @@ public class CanService
             // await _subSystemNotifier.NotifyDashboardAsync(signal.SubSystemId, signal.Name, decodedValue);
         }
 
-        await _signalMeasurementRepository.AddSignalMeasurementsAsync(signalMeasurements);
+
+
+        // await _signalMeasurementRepository.AddSignalMeasurementsAsync(signalMeasurements);
 
         // Process the CAN message and notify subscribers
         // await _subSystemNotifier.NotifySubscribersAsync("CAN", "MessageReceived", data);
