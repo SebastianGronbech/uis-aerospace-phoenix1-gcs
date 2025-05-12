@@ -68,7 +68,7 @@ const sampleData = {
   ],
 };
 
-const FlightEstimator = () => {
+const FlightEstimatorPage = () => {
   const fieldLabels = [
     'Field 1', 'Field 2', 'Field 3', 'Field 4', 'Field 5', 'Field 6',
     'Field 7', 'Field 8', 'Field 9', 'Field 10', 'Field 11', 'Field 12',
@@ -124,4 +124,4 @@ const FlightEstimator = () => {
   );
 };
 
-export default FlightEstimator;
+export default FlightEstimatorPage;

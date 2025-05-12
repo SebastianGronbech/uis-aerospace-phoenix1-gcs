@@ -64,7 +64,7 @@ const telemetryFields = [
   'M2 Pos', 'M2 Temp', 'M2 Curr',
 ];
 
-const EngineControl = () => {
+const EngineControlPage = () => {
     const handleCommand = (cmd) => {
         const confirmMessage = `Are you sure you want to send the "${cmd}" command?`;
         const confirmed = window.confirm(confirmMessage);
@@ -168,4 +168,4 @@ const EngineControl = () => {
   );
 };
 
-export default EngineControl;
+export default EngineControlPage;
