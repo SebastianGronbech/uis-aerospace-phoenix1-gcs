@@ -8,6 +8,8 @@ import { AuthProvider } from "@/features/auth/AuthContext";
 
 import LoginPage from "@/features/auth/pages/loginPage";
 import TelemetryPage from "@/features/telemetry/pages/TelemetryPage";
+import EngineControl from "@/features/engine_control/pages/EngineControl";
+import FlightEstimator from "@/features/flight_estimator/pages/FlightEstimator";
 
 const router = createBrowserRouter([
     {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
             {
                 path: "/telemetry",
                 element: <TelemetryPage />,
+            },
+            {
+                path: "/engine-control",
+                element: <EngineControl />,
+            },
+            {
+                path: "/flight-estimator",
+                element: <FlightEstimator />,
             },
         ],
     },
