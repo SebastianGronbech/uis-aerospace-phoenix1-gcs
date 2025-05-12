@@ -39,8 +39,9 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationContext>());
         services.AddScoped<ICommandRepository, EfCommandRepository>();
-services.AddHostedService<SerialPortService>();
-services.AddScoped<IPortSender, SerialPortService>(); // Allows injection into handlers
+services.AddSingleton<SerialPortService>();
+services.AddSingleton<IPortSender>(provider => provider.GetRequiredService<SerialPortService>());
+services.AddHostedService(provider => provider.GetRequiredService<SerialPortService>());
 services.AddScoped<ICreateCommandRepository, EfCreateCommandRepository>();
 services.AddScoped<IDeleteCommandRepository, EfDeleteCommandRepository>();
 services.AddScoped<CanService>();  

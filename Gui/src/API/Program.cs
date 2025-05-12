@@ -1,6 +1,11 @@
 using Gui.Core.CommandAggregate;
 using Gui.Core;
 using Gui.Infrastructure;
+using Gui.API.Notifiers;
+using Gui.Core.Domain.Telemetry;
+using Gui.API.Hubs;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +15,8 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services
     .AddCore()
     .AddInfrastructure(builder.Configuration);
+    builder.Services.AddSingleton<ISubSystemNotifier, SignalRSubSystemNotifier>();
+    builder.Services.AddScoped<CanService>();
 
 builder.Services.AddSignalR();
 
@@ -49,7 +56,8 @@ app.UseCors("CorsPolicy");
 
 app.MapControllers();
 
-app.MapHub<Gui.API.Hubs.CustomHub>("/hubs/custom");
+app.MapHub<DashBoardHub>("/dashboardHub");
+
 
 
 app.Run();
