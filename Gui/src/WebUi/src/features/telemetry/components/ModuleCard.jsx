@@ -17,13 +17,14 @@ const ModuleCard = ({
 
 
             <div className="border dark:border-gray-700 rounded-2xl shadow p-4">
-                <p className="font-semibold">
-                    Pakker Mottatt / Sendt ({moduleTitle.split(" ")[0]})
-                </p>
-                <p>Navn ............ Antall</p>
-                <p> - ................. {packetStatsData?.received || "N/A"}</p>
-                <p> - ................. {packetStatsData?.sent || "N/A"}</p>
-            </div>
+    <p className="font-semibold">
+        Packets Recieved / Sent ({moduleTitle.split(" ")[0]})
+    </p>
+    
+    <p> - {packetStatsData?.downlink ?? "N/A"}</p>
+    <p> - {packetStatsData?.uplink ?? "N/A"}</p>
+</div>
+
 
             <ControlPanel
                 moduleName={moduleTitle.split(" ")[0]} // Extracts "Ground" or "Rocket"

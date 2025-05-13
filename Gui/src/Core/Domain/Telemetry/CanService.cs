@@ -4,24 +4,20 @@ namespace Gui.Core.Domain.Telemetry
     {
         private readonly IMessageRepository _messageRepository;
         private readonly ISubSystemNotifier _subSystemNotifier;
-        // private readonly ISignalMeasurementRepository _signalMeasurementRepository;
-        // private readonly ITelemetryNotifier _telemetryNotifier;
 
         public CanService(
             IMessageRepository messageRepository,
             ISubSystemNotifier subSystemNotifier
-            // ITelemetryNotifier telemetryNotifier,
-            // ISignalMeasurementRepository signalMeasurementRepository
         )
         {
             _messageRepository = messageRepository;
             _subSystemNotifier = subSystemNotifier;
-            // _telemetryNotifier = telemetryNotifier;
-            // _signalMeasurementRepository = signalMeasurementRepository;
         }
 
         public async Task ProcessCanMessageAsync(int messageId, byte[] frame, DateTime timestamp)
         {
+           // Console.WriteLine($"📥 Received CAN message: ID={messageId}, Timestamp={timestamp}, Frame={BitConverter.ToString(frame)}");
+
             var message = await _messageRepository.GetMessageByIdAsync(messageId)
                 ?? throw new InvalidOperationException($"Message with ID {messageId} not found.");
 
@@ -29,21 +25,42 @@ namespace Gui.Core.Domain.Telemetry
 
             switch (messageId)
             {
+                // 🚀 Rocket telemetry or 🌍 Ground telemetry
                 case 300:
+                case 320:
                     foreach (var signal in message.Signals)
                     {
                         var decodedValue = DecodeSignal(frame, signal);
                         var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
-                        Console.WriteLine($"[300] {signal.Name} = {decodedValue} at {timestamp}");
+                       // Console.WriteLine($"[{messageId}] {signal.Name} = {decodedValue} at {timestamp}");
                         signalMeasurements.Add(signalMeasurement);
                     }
 
                     var payload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
-                    await _subSystemNotifier.NotifyDashboardAsync("rocket", "telemetry-update", payload);
-                    Console.WriteLine("🚀 Notifying dashboard");
-                    break;
+                    var targetSubsystem = messageId == 300 ? "rocket" : "ground";
 
+                    //Console.WriteLine($"📤 Notifying dashboard: {targetSubsystem} - telemetry-update");
+                    await _subSystemNotifier.NotifyDashboardAsync(targetSubsystem, "telemetry-update", payload);
+                    break;
+                case 302:
+                case 322:
+                    foreach (var signal in message.Signals)
+                    {
+                        var decodedValue = DecodeSignal(frame, signal);
+                        var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
+                        //Console.WriteLine($"[{messageId}] PacketCounter - {signal.Name} = {decodedValue} at {timestamp}");
+                        signalMeasurements.Add(signalMeasurement);
+                     }
+
+                    var packetPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
+                    var packetSubsystem = messageId == 302 ? "rocket" : "ground";
+                    await _subSystemNotifier.NotifyDashboardAsync(packetSubsystem, "packet-counters", packetPayload);
+                    //Console.WriteLine($"📦 Packet counters sent to dashboard: {packetSubsystem}");
+                    break;    
+
+                // 🚀 Rocket or 🌍 Ground signal quality
                 case 301:
+                case 321:
                     double? rssi = null;
                     double? snr = null;
 
@@ -53,13 +70,9 @@ namespace Gui.Core.Domain.Telemetry
                         signalMeasurements.Add(new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp));
 
                         if (signal.Name.Equals("Rssi", StringComparison.OrdinalIgnoreCase))
-                        {
                             rssi = Convert.ToDouble(decodedValue);
-                        }
                         else if (signal.Name.Equals("Snr", StringComparison.OrdinalIgnoreCase))
-                        {
                             snr = Convert.ToDouble(decodedValue);
-                        }
                     }
 
                     if (rssi.HasValue || snr.HasValue)
@@ -71,8 +84,11 @@ namespace Gui.Core.Domain.Telemetry
                             Timestamp = timestamp
                         };
 
-                        await _subSystemNotifier.NotifyDashboardAsync("rocket", "signal-quality", signalQualityPayload);
-                        Console.WriteLine("📶 Signal Quality sent");
+                        var subsystem = messageId == 301 ? "rocket" : "ground";
+
+                       // Console.WriteLine($"📶 Signal Quality [{subsystem}]: RSSI={rssi}, SNR={snr}");
+                       // Console.WriteLine($"📤 Notifying dashboard: {subsystem} - signal-quality");
+                        await _subSystemNotifier.NotifyDashboardAsync(subsystem, "signal-quality", signalQualityPayload);
                     }
 
                     break;
@@ -82,15 +98,13 @@ namespace Gui.Core.Domain.Telemetry
                     {
                         var decodedValue = DecodeSignal(frame, signal);
                         var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
-                        Console.WriteLine($"[default] {signal.Name} = {decodedValue} at {timestamp}");
+                        //Console.WriteLine($"[default] {signal.Name} = {decodedValue} at {timestamp}");
                         signalMeasurements.Add(signalMeasurement);
                     }
-
                     break;
             }
 
-            // Optionally persist signalMeasurements or do further processing here
-            // await _signalMeasurementRepository.AddSignalMeasurementsAsync(signalMeasurements);
+            // Persisting signals could happen here if needed
         }
 
         public static ulong ExtractBits(byte[] data, int startBit, int length)

@@ -73,7 +73,7 @@ namespace Gui.Infrastructure.Serial
 
                 if (_sp.IsOpen)
                 {
-                    Console.WriteLine($"[Serial] Port {_com} is already open.");
+                    //Console.WriteLine($"[Serial] Port {_com} is already open.");
                     return;
                 }
 
@@ -137,7 +137,7 @@ private void OnData(object? sender, SerialDataReceivedEventArgs e)
 
         private async Task ProcessLineAsync(string trimmed)
         {
-            Console.WriteLine($"[RX] {trimmed}");
+          //  Console.WriteLine($"[RX] {trimmed}");
 
             var parts = trimmed.Split(',');
 
@@ -180,7 +180,7 @@ private void OnData(object? sender, SerialDataReceivedEventArgs e)
             {
                 var msg = cmd.ToMessage();
                 _sp!.Write(msg, 0, msg.Length);
-                Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
+              //  Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
 
                 byte[] payloadBytes = BitConverter.GetBytes(cmd.Payload);
                 Array.Reverse(payloadBytes);

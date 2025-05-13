@@ -1,4 +1,3 @@
-// shared/hooks/useSignalR.js
 import { useState, useEffect, useCallback } from "react";
 import * as signalR from "@microsoft/signalr";
 
@@ -9,15 +8,36 @@ export const useSignalR = ({ hubUrl, accessTokenFactory }) => {
     useEffect(() => {
         const conn = new signalR.HubConnectionBuilder()
             .withUrl(hubUrl, { accessTokenFactory })
-            .withAutomaticReconnect()
+            .withAutomaticReconnect({
+                nextRetryDelayInMilliseconds: () => 3000, // try every 3s
+            })
+            .configureLogging(signalR.LogLevel.Information)
             .build();
+
+        conn.onclose((error) => {
+            console.error("🔌 SignalR connection closed:", error);
+            setConnected(false);
+        });
+
+        conn.onreconnected(() => {
+            console.log("🔄 SignalR reconnected");
+            setConnected(true);
+        });
+
+        conn.onreconnecting((error) => {
+            console.warn("♻️ SignalR reconnecting...", error);
+            setConnected(false);
+        });
 
         conn.start()
             .then(() => {
                 console.log("✅ SignalR connected");
                 setConnected(true);
             })
-            .catch(console.error);
+            .catch((err) => {
+                console.error("❌ SignalR connection error:", err);
+                setConnected(false);
+            });
 
         setConnection(conn);
 
@@ -26,7 +46,6 @@ export const useSignalR = ({ hubUrl, accessTokenFactory }) => {
         };
     }, [hubUrl]);
 
-    // ✅ Safe listener wrapper
     const on = useCallback((eventName, handler) => {
         if (!connection) return () => {};
         connection.on(eventName, handler);
@@ -34,8 +53,12 @@ export const useSignalR = ({ hubUrl, accessTokenFactory }) => {
     }, [connection]);
 
     const send = useCallback((method, data) => {
-        if (connection) {
-            connection.invoke(method, data).catch(console.error);
+        if (connection && connection.state === signalR.HubConnectionState.Connected) {
+            connection.invoke(method, data).catch(err =>
+                console.error(`❌ SignalR send error [${method}]:`, err)
+            );
+        } else {
+            console.warn("⚠️ Cannot send, SignalR not connected.");
         }
     }, [connection]);
 
