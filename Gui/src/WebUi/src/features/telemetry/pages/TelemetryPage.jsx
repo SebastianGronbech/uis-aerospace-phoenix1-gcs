@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +15,6 @@ import ModuleCard from "../components/ModuleCard";
 import UsageBar from "../components/UsageBar";
 import { useTelemetryHub } from "../hooks/useTelemetryHub";
 
-// Register ChartJS modules and plugins
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -27,10 +26,8 @@ ChartJS.register(
   Decimation
 );
 
-// Constants
-const MAX_POINTS = 1000;
-const WINDOW_SECONDS = 100;
-const FRAME_INTERVAL = 1000 / 144; // ~30 FPS
+const MAX_POINTS = 100;
+const FRAME_INTERVAL = 200;
 
 const isDark = () => document.documentElement.classList.contains("dark");
 
@@ -51,26 +48,30 @@ const formatTime = (ts) =>
     second: "2-digit",
   });
 
-// Hook: sliding-window buffer
-const useSlidingBuffer = (max = MAX_POINTS) => {
-  const [buf, setBuf] = useState([]);
-  const push = useCallback(
-    (value) =>
-      setBuf((prev) =>
-        prev.length >= max ? [...prev.slice(1), value] : [...prev, value]
-      ),
-    [max]
-  );
-  return [buf, push];
+const filterRecent = (timestamps, values) => {
+  const cutoff = Date.now() - 100 * 1000;
+  const labels = [];
+  const data = [];
+  for (let i = timestamps.length - 1; i >= 0; i--) {
+    const ts = timestamps[i];
+    if (ts < cutoff) break;
+    labels.unshift(formatTime(ts));
+    data.unshift(values[i]);
+  }
+  return { labels, data };
 };
 
-// Chart options factory with decimation
 const createChartOptions = (yMin, yMax, percent = false) => ({
   responsive: true,
   maintainAspectRatio: false,
   animation: false,
   plugins: {
-    decimation: { enabled: true, algorithm: "lttb", samples: 50 },
+    decimation: {
+      enabled: true,
+      algorithm: 'lttb',
+      samples: 50,
+      threshold: 200
+    },
     legend: { position: "top" },
     title: { display: false },
   },
@@ -94,7 +95,10 @@ const createChartOptions = (yMin, yMax, percent = false) => ({
     y: {
       min: yMin,
       max: yMax,
-      ticks: { color: isDark() ? "#ffffff" : "#4b5563", callback: percent ? (v) => `${v}%` : undefined },
+      ticks: {
+        color: isDark() ? "#ffffff" : "#4b5563",
+        callback: percent ? (v) => `${v}%` : undefined
+      },
       grid: { color: "rgba(255,255,255,0.1)" },
     },
   },
@@ -107,23 +111,6 @@ const snrOpts = createChartOptions(-50, 50);
 const percentOpts = createChartOptions(0, 100, true);
 const autoOpts = createChartOptions();
 
-// Keep only recent WINDOW_SECONDS
-const filterRecent = (timestamps, values) => {
-  const cutoff = Date.now() - WINDOW_SECONDS * 1000;
-  const labels = [];
-  const data = [];
-  for (let i = timestamps.length - 1; i >= 0; i--) {
-    const ts = timestamps[i];
-    if (ts < cutoff) break;
-    labels.unshift(formatTime(ts));
-    data.unshift(values[i]);
-  }
-  return { labels, data };
-};
-
-// Memoized ChartCard to avoid re-renders
-const MemoChartCard = React.memo(ChartCard);
-
 export default function TelemetryPage() {
   const {
     telemetryData,
@@ -133,17 +120,22 @@ export default function TelemetryPage() {
     groundPacketStats,
   } = useTelemetryHub();
 
-  const [timestamps, pushTs] = useSlidingBuffer();
-  const [rssiBuf, pushRssi] = useSlidingBuffer();
-  const [snrBuf, pushSnr] = useSlidingBuffer();
-  const [plBuf, pushPl] = useSlidingBuffer();
-  const [uplinkBuf, pushUplink] = useSlidingBuffer();
-  const [downlinkBuf, pushDownlink] = useSlidingBuffer();
+  const timestampsRef = useRef([]);
+  const rssiRef = useRef([]);
+  const snrRef = useRef([]);
+  const plRef = useRef([]);
+  const uplinkRef = useRef([]);
+  const downlinkRef = useRef([]);
 
   const lastTelemRef = useRef(0);
   const lastPacketRef = useRef(0);
 
-  // Throttled telemetry updates
+  const pushSample = (ref, value) => {
+    const arr = ref.current;
+    arr.push(value);
+    if (arr.length > MAX_POINTS) arr.shift();
+  };
+
   useEffect(() => {
     if (!telemetryData && !signalData) return;
     const nowPerf = performance.now();
@@ -154,21 +146,20 @@ export default function TelemetryPage() {
     let updated = false;
 
     if (isValidRssi(signalData?.rssi)) {
-      pushRssi(round(signalData.rssi));
+      pushSample(rssiRef, round(signalData.rssi));
       updated = true;
     }
     if (isValidSnr(signalData?.snr)) {
-      pushSnr(round(signalData.snr));
+      pushSample(snrRef, round(signalData.snr));
       updated = true;
     }
     if (isFiniteNumber(telemetryData?.PacketLoss)) {
-      pushPl(round(telemetryData.PacketLoss));
+      pushSample(plRef, round(telemetryData.PacketLoss));
       updated = true;
     }
-    if (updated) pushTs(now);
-  }, [telemetryData, signalData, pushRssi, pushSnr, pushPl, pushTs]);
+    if (updated) pushSample(timestampsRef, now);
+  }, [telemetryData, signalData]);
 
-  // Throttled packet stats updates
   useEffect(() => {
     if (!rocketPacketStats) return;
     const nowPerf = performance.now();
@@ -180,36 +171,91 @@ export default function TelemetryPage() {
 
     const { uplink, downlink } = rocketPacketStats;
     if (isFiniteNumber(uplink)) {
-      pushUplink(round(uplink));
+      pushSample(uplinkRef, round(uplink));
       updated = true;
     }
     if (isFiniteNumber(downlink)) {
-      pushDownlink(round(downlink));
+      pushSample(downlinkRef, round(downlink));
       updated = true;
     }
     if (uplink > 0 && isFiniteNumber(uplink) && isFiniteNumber(downlink)) {
       const lossPct = Math.min(Math.max(((uplink - downlink) / uplink) * 100, 0), 100);
-      pushPl(round(lossPct));
+      pushSample(plRef, round(lossPct));
       updated = true;
     }
-    if (updated) pushTs(now);
-  }, [rocketPacketStats, pushUplink, pushDownlink, pushPl, pushTs]);
+    if (updated) pushSample(timestampsRef, now);
+  }, [rocketPacketStats]);
 
-  // Filter recent data
-  const rssi = useMemo(() => filterRecent(timestamps, rssiBuf), [timestamps, rssiBuf]);
-  const snr = useMemo(() => filterRecent(timestamps, snrBuf), [timestamps, snrBuf]);
-  const pl = useMemo(() => filterRecent(timestamps, plBuf), [timestamps, plBuf]);
-  const uplink = useMemo(() => filterRecent(timestamps, uplinkBuf), [timestamps, uplinkBuf]);
-  const downlink = useMemo(() => filterRecent(timestamps, downlinkBuf), [timestamps, downlinkBuf]);
+  const rssiData = useMemo(() => {
+    const { labels, data } = filterRecent(timestampsRef.current, rssiRef.current);
+    return {
+      labels,
+      datasets: [{
+        label: "RSSI",
+        data,
+        borderColor: "#3b82f6",
+        backgroundColor: "rgba(59,130,246,0.2)",
+        tension: 0.1
+      }]
+    };
+  }, [telemetryData]);
 
-  // Memoized chart datasets
-  const rssiData = useMemo(() => ({ labels: rssi.labels, datasets: [{ label: "RSSI", data: rssi.data, borderColor: "#3b82f6", backgroundColor: "rgba(59,130,246,0.2)", tension: 0.1 }] }), [rssi.labels, rssi.data]);
-  const snrData = useMemo(() => ({ labels: snr.labels, datasets: [{ label: "SNR", data: snr.data, borderColor: "#10b981", backgroundColor: "rgba(16,185,129,0.2)", tension: 0.1 }] }), [snr.labels, snr.data]);
-  const plData = useMemo(() => ({ labels: pl.labels, datasets: [{ label: "Packet Loss (%)", data: pl.data, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.2)", tension: 0.1 }] }), [pl.labels, pl.data]);
-  const uplinkData = useMemo(() => ({ labels: uplink.labels, datasets: [{ label: "Sent", data: uplink.data, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.2)", tension: 0.1 }] }), [uplink.labels, uplink.data]);
-  const downlinkData = useMemo(() => ({ labels: downlink.labels, datasets: [{ label: "Received", data: downlink.data, borderColor: "#f87171", backgroundColor: "rgba(248,113,113,0.2)", tension: 0.1 }] }), [downlink.labels, downlink.data]);
+  const snrData = useMemo(() => {
+    const { labels, data } = filterRecent(timestampsRef.current, snrRef.current);
+    return {
+      labels,
+      datasets: [{
+        label: "SNR",
+        data,
+        borderColor: "#10b981",
+        backgroundColor: "rgba(16,185,129,0.2)",
+        tension: 0.1
+      }]
+    };
+  }, [telemetryData]);
 
-  // Status indicators
+  const plData = useMemo(() => {
+    const { labels, data } = filterRecent(timestampsRef.current, plRef.current);
+    return {
+      labels,
+      datasets: [{
+        label: "Packet Loss (%)",
+        data,
+        borderColor: "#f59e0b",
+        backgroundColor: "rgba(245,158,11,0.2)",
+        tension: 0.1
+      }]
+    };
+  }, [telemetryData]);
+
+  const uplinkData = useMemo(() => {
+    const { labels, data } = filterRecent(timestampsRef.current, uplinkRef.current);
+    return {
+      labels,
+      datasets: [{
+        label: "Sent",
+        data,
+        borderColor: "#6366f1",
+        backgroundColor: "rgba(99,102,241,0.2)",
+        tension: 0.1
+      }]
+    };
+  }, [telemetryData]);
+
+  const downlinkData = useMemo(() => {
+    const { labels, data } = filterRecent(timestampsRef.current, downlinkRef.current);
+    return {
+      labels,
+      datasets: [{
+        label: "Received",
+        data,
+        borderColor: "#f87171",
+        backgroundColor: "rgba(248,113,113,0.2)",
+        tension: 0.1
+      }]
+    };
+  }, [telemetryData]);
+
   const rocketStatuses = useMemo(() => telemetryData ? [
     { label: "Running", isOn: telemetryData.IsRunning },
     { label: "Not Frozen", isOn: !telemetryData.IsFrozen },
@@ -219,6 +265,7 @@ export default function TelemetryPage() {
     { label: "Serial TX OK", isOn: !telemetryData.IsSerialTxFull },
     { label: "Serial RX OK", isOn: !telemetryData.IsSerialRxFull },
   ] : [], [telemetryData]);
+
   const groundStatuses = useMemo(() => groundTelemetry ? [
     { label: "Running", isOn: groundTelemetry.IsRunning },
     { label: "Not Frozen", isOn: !groundTelemetry.IsFrozen },
@@ -232,31 +279,18 @@ export default function TelemetryPage() {
   return (
     <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white flex flex-col h-full">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
-        {/* Charts */}
         <div className="space-y-6 md:col-span-2 flex flex-col">
-          <MemoChartCard title="RSSI" chartData={rssiData} chartOptions={rssiOpts} />
+          <ChartCard title="RSSI" chartData={rssiData} chartOptions={rssiOpts} />
           <div className="grid grid-cols-1 grid-rows-4 md:grid-rows-2 md:grid-cols-2 gap-6 flex-grow">
-            <MemoChartCard title="SNR - Signal to Noise Ratio" chartData={snrData} chartOptions={snrOpts} />
-            <MemoChartCard title="Packet Loss (%)" chartData={plData} chartOptions={percentOpts} />
-            <MemoChartCard title="Sent" chartData={uplinkData} chartOptions={autoOpts} />
-            <MemoChartCard title="Received" chartData={downlinkData} chartOptions={autoOpts} />
+            <ChartCard title="SNR - Signal to Noise Ratio" chartData={snrData} chartOptions={snrOpts} />
+            <ChartCard title="Packet Loss (%)" chartData={plData} chartOptions={percentOpts} />
+            <ChartCard title="Sent" chartData={uplinkData} chartOptions={autoOpts} />
+            <ChartCard title="Received" chartData={downlinkData} chartOptions={autoOpts} />
           </div>
         </div>
-
-        {/* Status panes */}
         <div className="grid gap-6 md:grid-cols-2 md:grid-rows-[auto_1fr]">
-          <ModuleCard
-            moduleTitle="Ground Module"
-            packetStatsData={groundPacketStats}
-            onReset={() => console.log("Reset Ground")}
-            statusItems={groundStatuses}
-          />
-          <ModuleCard
-            moduleTitle="Rocket Module"
-            packetStatsData={rocketPacketStats}
-            onReset={() => console.log("Reset Rocket")}
-            statusItems={rocketStatuses}
-          />
+          <ModuleCard moduleTitle="Ground Module" packetStatsData={groundPacketStats} onReset={() => console.log("Reset Ground")} statusItems={groundStatuses} />
+          <ModuleCard moduleTitle="Rocket Module" packetStatsData={rocketPacketStats} onReset={() => console.log("Reset Rocket")} statusItems={rocketStatuses} />
           <div className="md:col-span-2">
             <UsageBar title="Telemetrilink Utnyttelse [%]" usagePercentage={75} />
           </div>
