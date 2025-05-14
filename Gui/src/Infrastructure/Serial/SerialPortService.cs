@@ -71,11 +71,11 @@ public sealed class SerialPortService : BackgroundService, IPortSender
                 _sp.DataReceived += OnData;
             }
 
-            if (_sp.IsOpen)
-            {
-                Console.WriteLine($"[Serial] Port {_com} is already open.");
-                return;
-            }
+                if (_sp.IsOpen)
+                {
+                    //Console.WriteLine($"[Serial] Port {_com} is already open.");
+                    return;
+                }
 
             Console.WriteLine($"[Serial] Opening port {_com}...");
             _sp.Open();
@@ -135,9 +135,9 @@ public sealed class SerialPortService : BackgroundService, IPortSender
 
 
 
-    private async Task ProcessLineAsync(string trimmed)
-    {
-        Console.WriteLine($"[RX] {trimmed}");
+        private async Task ProcessLineAsync(string trimmed)
+        {
+          //  Console.WriteLine($"[RX] {trimmed}");
 
         var parts = trimmed.Split(',');
 
@@ -179,12 +179,12 @@ public sealed class SerialPortService : BackgroundService, IPortSender
     {
         EnsurePortOpen();
 
-        await _txLock.WaitAsync();
-        try
-        {
-            var msg = cmd.ToMessage();
-            _sp!.Write(msg, 0, msg.Length);
-            Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
+            await _txLock.WaitAsync();
+            try
+            {
+                var msg = cmd.ToMessage();
+                _sp!.Write(msg, 0, msg.Length);
+              //  Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
 
             byte[] payloadBytes = BitConverter.GetBytes(cmd.Payload);
             Array.Reverse(payloadBytes);

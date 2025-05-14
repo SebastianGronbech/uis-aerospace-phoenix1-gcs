@@ -1,5 +1,5 @@
-using Gui.API.Hubs;
 using Gui.Core.Domain.Telemetry;
+using Gui.API.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Gui.API.Notifiers;
