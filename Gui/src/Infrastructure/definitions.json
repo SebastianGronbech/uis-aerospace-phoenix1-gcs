@@ -269,6 +269,148 @@
     },
 
     {
+        "Name": "FlightEstimatorStatus",
+        "Id": 200,
+        "Signals": [
+            {
+                "Name": "Status0",
+                "StartBit": 0,
+                "Length": 8,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status1",
+                "StartBit": 8,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status2",
+                "StartBit": 16,
+                "Length": 24,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status3",
+                "StartBit": 24,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status4",
+                "StartBit": 32,
+                "Length": 40,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "FlightEstimatorGNSSUTC",
+        "Id": 201,
+        "Signals": [
+            {
+                "Name": "Time",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Date",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "FlightEstimatorOrientationRPY",
+        "Id": 202,
+        "Signals": [
+            {
+                "Name": "Roll",
+                "StartBit": 0,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Pitch",
+                "StartBit": 16,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Yaw",
+                "StartBit": 32,
+                "Length": 16,
+                "IsSigned": false,
+                "Type": "int"
+            }
+        ]
+    },
+    {
+        "Name": "FlightEstimatorAltitude",
+        "Id": 203,
+        "Signals": [
+            {
+                "Name": "Altitude",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "FlightEstimatorGNSSPosition",
+        "Id": 204,
+        "Signals": [
+            {
+                "Name": "Latitude",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Longitude",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "FlightEstimatorVelocityClimbrate",
+        "Id": 206,
+        "Signals": [
+            {
+                "Name": "TotalVelocity",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Climbrate",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+
+    {
         "Name": "TelemetryRocketStatus",
         "Id": 300,
         "Signals": [
@@ -411,7 +553,6 @@
             }
         ]
     },
-
     {
         "Name": "TelemetryGroundStatus",
         "Id": 320,
@@ -555,7 +696,7 @@
             }
         ]
     },
-
+    
     {
         "Name": "BlackBoxStatus",
         "Id": 400,
