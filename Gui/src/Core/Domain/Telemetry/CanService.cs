@@ -16,7 +16,7 @@ namespace Gui.Core.Domain.Telemetry
 
         public async Task ProcessCanMessageAsync(int messageId, byte[] frame, DateTime timestamp)
         {
-           // Console.WriteLine($"📥 Received CAN message: ID={messageId}, Timestamp={timestamp}, Frame={BitConverter.ToString(frame)}");
+            // Console.WriteLine($"📥 Received CAN message: ID={messageId}, Timestamp={timestamp}, Frame={BitConverter.ToString(frame)}");
 
             var message = await _messageRepository.GetMessageByIdAsync(messageId)
                 ?? throw new InvalidOperationException($"Message with ID {messageId} not found.");
@@ -32,7 +32,7 @@ namespace Gui.Core.Domain.Telemetry
                     {
                         var decodedValue = DecodeSignal(frame, signal);
                         var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
-                       // Console.WriteLine($"[{messageId}] {signal.Name} = {decodedValue} at {timestamp}");
+                        // Console.WriteLine($"[{messageId}] {signal.Name} = {decodedValue} at {timestamp}");
                         signalMeasurements.Add(signalMeasurement);
                     }
 
@@ -42,6 +42,7 @@ namespace Gui.Core.Domain.Telemetry
                     //Console.WriteLine($"📤 Notifying dashboard: {targetSubsystem} - telemetry-update");
                     await _subSystemNotifier.NotifyDashboardAsync(targetSubsystem, "telemetry-update", payload);
                     break;
+
                 case 302:
                 case 322:
                     foreach (var signal in message.Signals)
@@ -50,13 +51,13 @@ namespace Gui.Core.Domain.Telemetry
                         var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
                         //Console.WriteLine($"[{messageId}] PacketCounter - {signal.Name} = {decodedValue} at {timestamp}");
                         signalMeasurements.Add(signalMeasurement);
-                     }
+                    }
 
                     var packetPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
                     var packetSubsystem = messageId == 302 ? "rocket" : "ground";
                     await _subSystemNotifier.NotifyDashboardAsync(packetSubsystem, "packet-counters", packetPayload);
                     //Console.WriteLine($"📦 Packet counters sent to dashboard: {packetSubsystem}");
-                    break;    
+                    break;
 
                 // 🚀 Rocket or 🌍 Ground signal quality
                 case 301:
@@ -86,13 +87,51 @@ namespace Gui.Core.Domain.Telemetry
 
                         var subsystem = messageId == 301 ? "rocket" : "ground";
 
-                       // Console.WriteLine($"📶 Signal Quality [{subsystem}]: RSSI={rssi}, SNR={snr}");
-                       // Console.WriteLine($"📤 Notifying dashboard: {subsystem} - signal-quality");
+                        // Console.WriteLine($"📶 Signal Quality [{subsystem}]: RSSI={rssi}, SNR={snr}");
+                        // Console.WriteLine($"📤 Notifying dashboard: {subsystem} - signal-quality");
                         await _subSystemNotifier.NotifyDashboardAsync(subsystem, "signal-quality", signalQualityPayload);
                     }
-
                     break;
 
+                // FLIGHT ESTIMATOR SPECIAL CASES -- MOVED ABOVE DEFAULT!!
+                case 200: // FlightEstimatorStatus
+                case 201: // FlightEstimatorGNSSUTC
+                case 202: // FlightEstimatorOrientationRPY
+                case 203: // FlightEstimatorAltitude
+                case 204: // FlightEstimatorGNSSPosition
+                case 206: // FlightEstimatorVelocityClimbrate
+                {
+                    foreach (var signal in message.Signals)
+                    {
+                        var decodedValue = DecodeSignal(frame, signal);
+                        signalMeasurements.Add(new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp));
+                    }
+
+                    var estimatorPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
+                   // Console.WriteLine($"[DEBUG] Entered CAN flight-estimator block for ID {messageId}");
+
+                    var sanitizedPayload = estimatorPayload
+                        .Where(kv =>
+                        {
+                            if (kv.Value is double d)
+                                return !double.IsNaN(d) && !double.IsInfinity(d);
+                            return true;
+                        })
+                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+                    sanitizedPayload["LoggedAtUtc"] = timestamp.ToUniversalTime();
+                   // Console.WriteLine($"[DEBUG] Sanitized payload for {messageId}: " +
+                      //  string.Join(", ", sanitizedPayload.Select(kv => $"{kv.Key}={kv.Value}")));
+
+                    await _subSystemNotifier.NotifyDashboardAsync(
+                        "flight-estimator",
+                        "estimator-update",
+                        sanitizedPayload
+                    );
+                    break;
+                }
+
+                // DEFAULT SHOULD BE LAST!
                 default:
                     foreach (var signal in message.Signals)
                     {

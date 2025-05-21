@@ -18,6 +18,8 @@ internal static class CsvLogger
         await Gate.WaitAsync();
         try
         {
+          //  Console.WriteLine($"[CSV] LOGGING: CAN={canId} Payload={BitConverter.ToString(payload)} TS={mcuTimestamp}");
+          //  Console.WriteLine($"[CSV] Using file: {Path.GetFullPath(FileName)}");
             if (!File.Exists(FileName))
             {
                 await File.WriteAllTextAsync(
@@ -43,7 +45,7 @@ internal static class CsvLogger
 /// </summary>
 public sealed class SerialPortService : BackgroundService, IPortSender
 {
-    private readonly string _com = "COM3";
+    private readonly string _com = "COM6";
     private readonly int _baud = 115200;
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -96,6 +98,7 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         try
         {
             string incoming = _sp!.ReadExisting();
+          //  Console.WriteLine($"[SERIAL] Raw incoming: '{incoming.Replace("\n", "\\n").Replace("\r", "\\r")}'");
             _serialBuffer.Append(incoming);
 
             while (true)
@@ -111,6 +114,7 @@ public sealed class SerialPortService : BackgroundService, IPortSender
 
                 if (!string.IsNullOrWhiteSpace(line))
                 {
+                //    Console.WriteLine($"[SERIAL] Complete line: '{line}'");
                     _ = ProcessLineAsync(line);
                 }
             }
@@ -122,6 +126,7 @@ public sealed class SerialPortService : BackgroundService, IPortSender
                 var parts = maybeLine.Split(',');
                 if (parts.Length >= 9)
                 {
+                 //   Console.WriteLine($"[SERIAL] Flushing incomplete line as full: '{maybeLine}'");
                     _serialBuffer.Clear();
                     _ = ProcessLineAsync(maybeLine);
                 }
@@ -169,10 +174,13 @@ public sealed class SerialPortService : BackgroundService, IPortSender
             ? parsedDateTime
             : DateTime.UtcNow;
 
+       // Console.WriteLine($"[RX] Final parsed: CAN ID={canId}, Bytes={BitConverter.ToString(bytes)}, Timestamp={parsedTimestamp:o}");
         using var scope = _scopeFactory.CreateScope();
         var canService = scope.ServiceProvider.GetRequiredService<CanService>();
+     //   Console.WriteLine($"[DEBUG] Passing CAN {canId} to CanService, Bytes={BitConverter.ToString(bytes)}, Timestamp={parsedTimestamp:o}");
         await canService.ProcessCanMessageAsync(canId, bytes, parsedTimestamp);
         await CsvLogger.AppendAsync(canId, bytes, timestamp);
+      //  Console.WriteLine($"[DEBUG] Logged CAN {canId} to CSV");
     }
 
     public async Task SendAsync(Command cmd)

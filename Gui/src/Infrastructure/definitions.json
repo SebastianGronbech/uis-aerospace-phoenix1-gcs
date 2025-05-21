@@ -281,28 +281,28 @@
              {
                 "Name": "Status1",
                 "StartBit": 8,
-                "Length": 16,
+                "Length": 8,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status2",
                 "StartBit": 16,
-                "Length": 24,
+                "Length": 8,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status3",
                 "StartBit": 24,
-                "Length": 32,
+                "Length": 8,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status4",
                 "StartBit": 32,
-                "Length": 40,
+                "Length": 8,
                 "IsSigned": false,
                 "Type": "int"
             }
