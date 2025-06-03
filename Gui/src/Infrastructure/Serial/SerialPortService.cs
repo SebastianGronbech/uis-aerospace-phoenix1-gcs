@@ -18,8 +18,6 @@ internal static class CsvLogger
         await Gate.WaitAsync();
         try
         {
-          //  Console.WriteLine($"[CSV] LOGGING: CAN={canId} Payload={BitConverter.ToString(payload)} TS={mcuTimestamp}");
-          //  Console.WriteLine($"[CSV] Using file: {Path.GetFullPath(FileName)}");
             if (!File.Exists(FileName))
             {
                 await File.WriteAllTextAsync(
@@ -40,18 +38,17 @@ internal static class CsvLogger
 }
 
 // ──────────────────────────────────────── Serial Service ───────────────────────────────────────
-/// <summary>
-/// Opens the serial port on demand, listens forever, and sends commands immediately.
-/// </summary>
 public sealed class SerialPortService : BackgroundService, IPortSender
 {
-    private readonly string _com = "COM6";
+    private readonly string _com = "COM4";
     private readonly int _baud = 115200;
     private readonly IServiceScopeFactory _scopeFactory;
 
     private SerialPort? _sp;
     private readonly SemaphoreSlim _initLock = new(1, 1);
     private readonly SemaphoreSlim _txLock = new(1, 1);
+    private readonly StringBuilder _serialBuffer = new();
+    private DateTime _lastRx = DateTime.UtcNow;
 
     public SerialPortService(IServiceScopeFactory scopeFactory)
     {
@@ -63,25 +60,23 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         _initLock.Wait();
         try
         {
-            if (_sp == null)
+            if (_sp == null || !_sp.IsOpen)
             {
+                _sp?.Dispose();
                 _sp = new SerialPort(_com, _baud)
                 {
                     DtrEnable = true,
-                    Encoding = Encoding.ASCII
+                    Encoding = Encoding.ASCII,
+                    ReadTimeout = 500
                 };
                 _sp.DataReceived += OnData;
+                _sp.Open();
+                Console.WriteLine($"[Serial] {_com} opened (baud {_baud}).");
             }
-
-                if (_sp.IsOpen)
-                {
-                    //Console.WriteLine($"[Serial] Port {_com} is already open.");
-                    return;
-                }
-
-            Console.WriteLine($"[Serial] Opening port {_com}...");
-            _sp.Open();
-            Console.WriteLine($"[Serial] {_com} opened (baud {_baud}).");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Serial] Error opening port: {ex.Message}");
         }
         finally
         {
@@ -89,23 +84,19 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         }
     }
 
-
-
-    private readonly StringBuilder _serialBuffer = new();
-
     private void OnData(object? sender, SerialDataReceivedEventArgs e)
     {
+        _lastRx = DateTime.UtcNow;
+
         try
         {
             string incoming = _sp!.ReadExisting();
-          //  Console.WriteLine($"[SERIAL] Raw incoming: '{incoming.Replace("\n", "\\n").Replace("\r", "\\r")}'");
             _serialBuffer.Append(incoming);
 
             while (true)
             {
                 string buffer = _serialBuffer.ToString();
                 int newlineIndex = buffer.IndexOfAny(new[] { '\n', '\r' });
-
                 if (newlineIndex == -1)
                     break;
 
@@ -114,19 +105,17 @@ public sealed class SerialPortService : BackgroundService, IPortSender
 
                 if (!string.IsNullOrWhiteSpace(line))
                 {
-                //    Console.WriteLine($"[SERIAL] Complete line: '{line}'");
                     _ = ProcessLineAsync(line);
                 }
             }
 
-            // Handle final line if there's no newline but it looks complete
+            // Handle incomplete final line
             if (_serialBuffer.Length > 0)
             {
                 string maybeLine = _serialBuffer.ToString().Trim();
                 var parts = maybeLine.Split(',');
                 if (parts.Length >= 9)
                 {
-                 //   Console.WriteLine($"[SERIAL] Flushing incomplete line as full: '{maybeLine}'");
                     _serialBuffer.Clear();
                     _ = ProcessLineAsync(maybeLine);
                 }
@@ -134,16 +123,12 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[RX] Error in OnData: {ex.Message}");
+            Console.WriteLine($"[RX] Error in OnData: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
-
-
-        private async Task ProcessLineAsync(string trimmed)
-        {
-          //  Console.WriteLine($"[RX] {trimmed}");
-
+    private async Task ProcessLineAsync(string trimmed)
+    {
         var parts = trimmed.Split(',');
 
         if (parts.Length < 9 || parts.Length > 10)
@@ -174,31 +159,32 @@ public sealed class SerialPortService : BackgroundService, IPortSender
             ? parsedDateTime
             : DateTime.UtcNow;
 
-       // Console.WriteLine($"[RX] Final parsed: CAN ID={canId}, Bytes={BitConverter.ToString(bytes)}, Timestamp={parsedTimestamp:o}");
         using var scope = _scopeFactory.CreateScope();
         var canService = scope.ServiceProvider.GetRequiredService<CanService>();
-     //   Console.WriteLine($"[DEBUG] Passing CAN {canId} to CanService, Bytes={BitConverter.ToString(bytes)}, Timestamp={parsedTimestamp:o}");
+
         await canService.ProcessCanMessageAsync(canId, bytes, parsedTimestamp);
         await CsvLogger.AppendAsync(canId, bytes, timestamp);
-      //  Console.WriteLine($"[DEBUG] Logged CAN {canId} to CSV");
     }
 
     public async Task SendAsync(Command cmd)
     {
         EnsurePortOpen();
 
-            await _txLock.WaitAsync();
-            try
-            {
-                var msg = cmd.ToMessage();
-                _sp!.Write(msg, 0, msg.Length);
-              //  Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
+        await _txLock.WaitAsync();
+        try
+        {
+            var msg = cmd.ToMessage();
+            _sp!.Write(msg, 0, msg.Length);
+            Console.WriteLine($"[TX] {Encoding.ASCII.GetString(msg).Trim()}");
 
             byte[] payloadBytes = BitConverter.GetBytes(cmd.Payload);
             Array.Reverse(payloadBytes);
             await CsvLogger.AppendAsync(cmd.CanId, payloadBytes);
         }
-        finally { _txLock.Release(); }
+        finally
+        {
+            _txLock.Release();
+        }
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -209,6 +195,34 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                // Reopen if no data has been received in 5 seconds
+                if ((DateTime.UtcNow - _lastRx).TotalSeconds > 5)
+                {
+                    Console.WriteLine("[Serial] RX timeout detected. Reopening port...");
+
+                    try
+{
+    if (_sp != null)
+    {
+        _sp.DataReceived -= OnData;
+
+        if (_sp.IsOpen)
+            _sp.Close();
+
+        _sp.Dispose();
+        _sp = null;
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[Serial] Error closing port: {ex.Message}");
+}
+
+
+                    _sp = null;
+                    EnsurePortOpen();
+                }
+
                 await Task.Delay(1000, stoppingToken);
             }
         }, stoppingToken);
@@ -217,8 +231,20 @@ public sealed class SerialPortService : BackgroundService, IPortSender
     public override void Dispose()
     {
         Console.WriteLine("Port is closing");
-        _sp?.Close();
-        _sp?.Dispose();
+        try
+        {
+            if (_sp != null)
+            {
+                _sp.DataReceived -= OnData;
+                _sp.Close();
+                _sp.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Serial] Error during Dispose: {ex.Message}");
+        }
+
         base.Dispose();
     }
 }

@@ -122,6 +122,7 @@ namespace Gui.Core.Domain.Telemetry
                     sanitizedPayload["LoggedAtUtc"] = timestamp.ToUniversalTime();
                    // Console.WriteLine($"[DEBUG] Sanitized payload for {messageId}: " +
                       //  string.Join(", ", sanitizedPayload.Select(kv => $"{kv.Key}={kv.Value}")));
+                      
 
                     await _subSystemNotifier.NotifyDashboardAsync(
                         "flight-estimator",
@@ -172,6 +173,7 @@ namespace Gui.Core.Domain.Telemetry
                 "bool" => signedValue != 0,
                 "int" => signal.Length switch
                 {
+                    1 => (byte)signedValue, // ✅ handle 1-bit signals as byte (0 or 1)
                     8 => signal.IsSigned ? (sbyte)signedValue : (byte)signedValue,
                     16 => signal.IsSigned ? (short)signedValue : (ushort)signedValue,
                     32 => signal.IsSigned ? (int)signedValue : (uint)signedValue,

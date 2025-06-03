@@ -1,4 +1,8 @@
 using MediatR;
+using System;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Gui.Core.CommandAggregate
 {
@@ -24,15 +28,20 @@ namespace Gui.Core.CommandAggregate
 
             var (canId, payloadStr) = result.Value;
 
-            if (!ulong.TryParse(payloadStr, out var payload))
+            // Normalize hex string (remove "0x" if present)
+            var normalized = payloadStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                ? payloadStr[2..]
+                : payloadStr;
+
+            if (!ulong.TryParse(normalized, NumberStyles.HexNumber, null, out var payload))
             {
-                return $"Invalid payload format for '{request.PublicId}'";
+                return $"Invalid hexadecimal payload format for '{request.PublicId}'";
             }
 
             var command = new Command(canId, payload);
             await _portSender.SendAsync(command);
 
-            return $"Command {command.CanId} sent for public ID '{request.PublicId}'";
+            return $"Command 0x{command.CanId:X} with payload 0x{command.Payload:X} sent for public ID '{request.PublicId}'";
         }
     }
 }

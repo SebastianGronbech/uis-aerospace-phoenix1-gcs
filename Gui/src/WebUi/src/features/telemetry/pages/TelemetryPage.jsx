@@ -276,6 +276,23 @@ export default function TelemetryPage() {
     { label: "Serial RX OK", isOn: !groundTelemetry.IsSerialRxFull },
   ] : [], [groundTelemetry]);
 
+  const handleReset = async (publicId) => {
+  try {
+    const response = await fetch(`http://localhost:5017/api/commands/${publicId}/send`, {
+      method: "POST",
+    });
+
+    if (!response.ok) throw new Error("Failed to send command");
+
+    const result = await response.text(); // use text() instead of json()
+    console.log("Command sent:", result);
+  } catch (error) {
+    console.error("API Error:", error);
+  }
+};
+
+
+
   return (
     <div className="p-6 space-y-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-white flex flex-col h-full">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
@@ -289,8 +306,20 @@ export default function TelemetryPage() {
           </div>
         </div>
         <div className="grid gap-6 md:grid-cols-2 md:grid-rows-[auto_1fr]">
-          <ModuleCard moduleTitle="Ground Module" packetStatsData={groundPacketStats} onReset={() => console.log("Reset Ground")} statusItems={groundStatuses} />
-          <ModuleCard moduleTitle="Rocket Module" packetStatsData={rocketPacketStats} onReset={() => console.log("Reset Rocket")} statusItems={rocketStatuses} />
+          <ModuleCard
+            moduleTitle="Ground Module"
+            packetStatsData={groundPacketStats}
+            onReset={() => handleReset(324)} // publicId = 324
+            statusItems={groundStatuses}
+          />
+
+          <ModuleCard
+            moduleTitle="Rocket Module"
+            packetStatsData={rocketPacketStats}
+            onReset={() => handleReset(304)} // publicId = 304
+            statusItems={rocketStatuses}
+          />
+
           <div className="md:col-span-2">
             <UsageBar title="Telemetrilink Utnyttelse [%]" usagePercentage={75} />
           </div>

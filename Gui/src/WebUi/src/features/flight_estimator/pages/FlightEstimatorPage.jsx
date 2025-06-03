@@ -58,15 +58,14 @@ const chartOptions = {
 };
 
 const fieldLabels = [
-  "Altitude",         // meters
-  "TotalVelocity",    // m/s
-  "Climbrate",        // m/s
+  "Altitude",
+  "TotalVelocity",
+  "Climbrate",
   "Latitude",
   "Longitude",
   "Roll",
   "Pitch",
   "Yaw",
-  "Time",
   "Date",
 ];
 
@@ -74,33 +73,59 @@ const FlightEstimatorPage = () => {
   const {
     estimatorFields,
     getChartData,
-    sendCommand,
     connected,
   } = useFlightEstimatorHub();
 
-  // Build statusItems for Connected and 5 CAN statuses
-  const statusKeys = ["Status0", "Status1", "Status2", "Status3", "Status4"];
-  //console.log("Status0 value:", estimatorFields["Status0"]);
-  //console.log("Estimator fields:", estimatorFields);
+const statusMap = {
+    Status0: "Calibrating Altitude",
+    Status1: "Calibrating Kalman",
+    Status2: "Awaiting GNSS",
+    Status3: "Recording",
+    Status4: "Erasing Recordings",
+    Status5: "Acceleration Predictor",
+    Status6: "GNSS Status",
+    Status7: "Calibrated and Running",
+  };  
+
+ const logEstimatorStatuses = (estimatorFields) => {
+  
+  console.log("📡 Estimator Statuses:");
+  Object.entries(statusMap).forEach(([signalKey, label]) => {
+    const value = estimatorFields[signalKey];
+    console.log(`- ${label}: ${value ?? "Not received"}`);
+  });
+};
+
+
+
+;
 
   const statusItems = [
-    { label: "Connected", isOn: connected },
-    ...statusKeys.map((key) => {
-      const value = estimatorFields[key];
-      // Try to interpret value as ASCII char if it's a number
-      const asChar = typeof value === "number" ? String.fromCharCode(value) : value;
-      //console.log(`Key: ${key}, Raw:`, value, "asChar:", asChar, "isOn:", asChar === "A");
-      return {
-        label: `${key} (${asChar ?? "-"})`,
-        isOn: asChar === "A",
-      };
-    })
-  ];
+  { label: "Connected", isOn: connected },
+  ...Object.entries(statusMap).map(([signalKey, label]) => {
+    const value = estimatorFields[signalKey];
+    return {
+      label: `${label} (${value ?? "-"})`,
+      isOn: value === 1,
+    };
+  }),
+];
 
-  const handleCommand = (cmd) => {
-    const confirmed = window.confirm(`Are you sure you want to send the "${cmd}" command?`);
-    if (confirmed) {
-      sendCommand(cmd);
+
+
+
+  const sendCommandToApi = async (url) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        console.error("Failed to send command:", response.statusText);
+      } else {
+        console.log("Command sent to", url);
+      }
+    } catch (err) {
+      console.error("Error sending command to", url, ":", err);
     }
   };
 
@@ -108,10 +133,8 @@ const FlightEstimatorPage = () => {
     <div className="p-4 text-sm bg-gray-900 text-white min-h-screen h-screen flex flex-col gap-4">
       <h1 className="text-xl font-semibold">Flight Estimator</h1>
 
-      {/* Status lights for Connected and the 5 CAN status bytes */}
       <StatusDisplay statuses={statusItems} />
 
-      {/* Display all current telemetry values */}
       <ValuesDisplay labels={fieldLabels} values={estimatorFields} />
 
       <div className="grid grid-cols-2 gap-4 h-[50vh]">
@@ -130,13 +153,26 @@ const FlightEstimatorPage = () => {
       </div>
 
       <div className="flex flex-wrap gap-2 mt-auto">
-        {[...Array(6)].map((_, i) => (
+        {[
+          { label: "Calibrate Kalman", url: "http://localhost:5017/api/commands/21/send" },
+          { label: "Calibrate Altitude", url: "http://localhost:5017/api/commands/20/send" },
+          { label: "Start Recording", url: "http://localhost:5017/api/commands/22/send" },
+          { label: "Stop Recording", url: "http://localhost:5017/api/commands/23/send" },
+          { label: "Erase Recording", url: "http://localhost:5017/api/commands/24/send" },
+          { label: "Start Acc predictor", url: "http://localhost:5017/api/commands/25/send" },
+          { label: "Stop Acc predictor", url: "http://localhost:5017/api/commands/26/send" },
+        ].map(({ label, url }) => (
           <button
-            key={i}
-            onClick={() => handleCommand(i)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            key={url}
+            onClick={() => {
+              const confirmed = window.confirm(`Are you sure you want to "${label}"?`);
+              if (confirmed) {
+                sendCommandToApi(url);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            {`Button ${i + 1}`}
+            {label}
           </button>
         ))}
       </div>

@@ -50,7 +50,7 @@ public class ApplicationContext : IdentityDbContext<IdentityUser<Guid>, Identity
         modelBuilder.Entity<CommandEntity>(entity =>
         {
             entity.ToTable("commands");
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.PublicIdentifier);
 
             entity.Property(e => e.Id)
                   .ValueGeneratedNever();

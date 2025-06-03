@@ -9,8 +9,9 @@ const allFieldKeys = [
   "Latitude", "Longitude",
   "Roll", "Pitch", "Yaw",
   "Time", "Date",
-  "Status0", "Status1", "Status2", "Status3", "Status4"
+  "Status0", "Status1", "Status2", "Status3", "Status4", "Status5", "Status6", "Status7",
 ];
+const INT16_TO_DEG_SCALE = 180.0 / 32767.0;
 
 export const useFlightEstimatorHub = () => {
   const [estimatorFields, setEstimatorFields] = useState({});
@@ -44,31 +45,44 @@ export const useFlightEstimatorHub = () => {
     return () => unsub();
   }, [connected, on, send]);
 
-  // Every 1s, commit the latest packet to history and UI
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      timestamps.current.push(now);
+useEffect(() => {
+  const interval = setInterval(() => {
+    const now = Date.now();
+    timestamps.current.push(now);
 
-      for (const key of allFieldKeys) {
-        if (!fieldHistory.current[key]) fieldHistory.current[key] = [];
-        // Save the current latestPacket value for each field (or null if never set)
-        fieldHistory.current[key].push(latestPacket.current[key] ?? null);
+    for (const key of allFieldKeys) {
+      if (!fieldHistory.current[key]) fieldHistory.current[key] = [];
+
+      let value = latestPacket.current[key] ?? null;
+
+      // Apply scaling to Yaw, Pitch, and Roll
+      if (["Yaw", "Pitch", "Roll"].includes(key) && typeof value === "number") {
+        value = value * INT16_TO_DEG_SCALE;
       }
 
-      // Prune old data
-      while (timestamps.current.length && (now - timestamps.current[0]) > WINDOW_MS) {
-        timestamps.current.shift();
-        allFieldKeys.forEach(key => {
-          if (fieldHistory.current[key].length) fieldHistory.current[key].shift();
-        });
-      }
+      fieldHistory.current[key].push(value);
+    }
 
-      // Update UI
-      setEstimatorFields({ ...latestPacket.current });
-    }, 1000); // 1 second
-    return () => clearInterval(interval);
-  }, []);
+    // Prune old data
+    while (timestamps.current.length && (now - timestamps.current[0]) > WINDOW_MS) {
+      timestamps.current.shift();
+      allFieldKeys.forEach(key => {
+        if (fieldHistory.current[key].length) fieldHistory.current[key].shift();
+      });
+    }
+
+    // Update UI
+    const scaledPacket = { ...latestPacket.current };
+    for (const key of ["Yaw", "Pitch", "Roll"]) {
+      if (key in scaledPacket && typeof scaledPacket[key] === "number") {
+        scaledPacket[key] = scaledPacket[key] * INT16_TO_DEG_SCALE;
+      }
+    }
+    setEstimatorFields(scaledPacket);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const getChartData = (fieldKey) => {
     const values = fieldHistory.current[fieldKey] || [];

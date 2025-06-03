@@ -272,40 +272,69 @@
         "Id": 200,
         "Signals": [
             {
-                "Name": "Status0",
+                "Name": "Control",
                 "StartBit": 0,
-                "Length": 8,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status0",
+                "StartBit": 32,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
              {
                 "Name": "Status1",
-                "StartBit": 8,
-                "Length": 8,
+                "StartBit": 33,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status2",
-                "StartBit": 16,
-                "Length": 8,
+                "StartBit": 34,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status3",
-                "StartBit": 24,
-                "Length": 8,
+                "StartBit": 35,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
                 "Name": "Status4",
-                "StartBit": 32,
-                "Length": 8,
+                "StartBit": 36,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status5",
+                "StartBit": 37,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+             {
+                "Name": "Status6",
+                "StartBit": 38,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+             {
+                "Name": "Status7",
+                "StartBit": 39,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             }
+            
         ]
     },
     {
@@ -324,7 +353,7 @@
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
-                "Type": "float"
+                "Type": "int"
             }
         ]
     },
