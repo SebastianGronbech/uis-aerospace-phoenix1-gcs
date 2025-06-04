@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 // import logo from "@/assets/logo.png";
 import logo from "@/assets/phoenix_logo.png";
+import NavBar from "./NavBar";
 
 const Header = () => {
     // const logo =
@@ -36,7 +37,7 @@ const Header = () => {
                 </div>
             </div>
 
-            {/* NavBar */}
+            <NavBar />
 
             <button
                 onClick={toggleTheme}
