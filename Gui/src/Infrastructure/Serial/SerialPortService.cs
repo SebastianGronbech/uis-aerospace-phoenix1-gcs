@@ -40,7 +40,7 @@ internal static class CsvLogger
 // ──────────────────────────────────────── Serial Service ───────────────────────────────────────
 public sealed class SerialPortService : BackgroundService, IPortSender
 {
-    private readonly string _com = "COM4";
+    private readonly string _com = "COM6";
     private readonly int _baud = 115200;
     private readonly IServiceScopeFactory _scopeFactory;
 
