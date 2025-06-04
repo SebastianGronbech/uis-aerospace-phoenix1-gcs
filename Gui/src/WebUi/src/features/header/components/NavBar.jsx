@@ -8,6 +8,7 @@ function NavBar() {
         { path: "/telemetry", label: "Telemetry" },
         { path: "/engine-control", label: "Engine Control" },
         { path: "/flight-estimator", label: "Flight Estimator" },
+        { path: "/black-box", label: "Black Box" },
     ];
 
     return (
