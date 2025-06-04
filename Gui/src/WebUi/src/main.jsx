@@ -24,8 +24,9 @@ const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <LoginPage />,
+                element: <DashboardPage />,
             },
+            
             {
                 path: "/telemetry",
                 element: <TelemetryPage />,
@@ -38,10 +39,7 @@ const router = createBrowserRouter([
                 path: "/flight-estimator",
                 element: <FlightEstimatorPage />,
             },
-             {
-                path: "/dashboard",
-                element: <DashboardPage />,
-            },
+           
         ],
     },
 ]);

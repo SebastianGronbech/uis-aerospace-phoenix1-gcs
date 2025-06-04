@@ -5,9 +5,11 @@ function NavBar() {
     const location = useLocation();
 
     const navItems = [
+        { path: "/", label: "Home" },
         { path: "/telemetry", label: "Telemetry" },
         { path: "/engine-control", label: "Engine Control" },
         { path: "/flight-estimator", label: "Flight Estimator" },
+        
     ];
 
     return (
