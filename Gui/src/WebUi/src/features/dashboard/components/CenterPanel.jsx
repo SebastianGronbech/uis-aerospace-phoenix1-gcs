@@ -4,11 +4,11 @@ import React from "react";
 export default function CenterPanel({ sendCommandToApi }) {
   // Five action buttons
   const commands = [
-    { label: "Action 1", url: "http://localhost:5017/api/commands/action1" },
-    { label: "Action 2", url: "http://localhost:5017/api/commands/action2" },
-    { label: "Action 3", url: "http://localhost:5017/api/commands/action3" },
-    { label: "Action 4", url: "http://localhost:5017/api/commands/action4" },
-    { label: "Action 5", url: "http://localhost:5017/api/commands/action5" },
+    { label: "Set Prelaunch", url: "http://localhost:5017/api/commands/2/send" },
+    { label: "Set Launch Imininent", url: "http://localhost:5017/api/commands/3/send" },
+    { label: "Set Coasting Descent", url: "http://localhost:5017/api/commands/4/send" },
+    { label: "Set Main Deploy", url: "http://localhost:5017/api/commands/5/send" },
+    { label: "Terminate", url: "http://localhost:5017/api/commands/1/send" },
   ];
 
   return (

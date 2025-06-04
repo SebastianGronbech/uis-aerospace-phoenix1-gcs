@@ -1,24 +1,27 @@
 // src/features/dashboard/components/BottomProgress.jsx
 import React from "react";
 
-export default function BottomProgress({ activeStep = 1 }) {
+export default function BottomProgress({ activeStep = null }) {
   const steps = [
     { id: 1, label: "Pre Launch" },
     { id: 2, label: "Launch Imminent" },
     { id: 3, label: "Acceleration" },
     { id: 4, label: "Coasting Climb" },
     { id: 5, label: "Coasting Descent" },
-    { id: 6, label: "Main" },
+    { id: 6, label: "Main Deploy" },
+    { id: 7, label: "Terminate" }, // New step for terminate
   ];
 
   return (
-    <footer className="
+    <footer
+      className="
       fixed bottom-0 left-0 right-0 
       bg-white dark:bg-gray-800 
       border-t border-gray-300 dark:border-gray-600 
       px-6 py-2 flex items-center 
       z-10
-    ">
+    "
+    >
       <div className="flex flex-1">
         {steps.map((step) => (
           <div key={step.id} className="flex-1 flex flex-col items-center">

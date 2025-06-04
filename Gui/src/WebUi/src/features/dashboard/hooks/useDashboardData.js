@@ -1,27 +1,28 @@
-// Install the Chart.js and React wrapper if you haven’t already:
-// npm install chart.js react-chartjs-2
-
 // src/features/dashboard/hooks/useDashboardData.jsx
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSignalR } from "../hooks/useSignalR";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
 export function useDashboardData() {
-  // Holds the latest telemetry fields: Altitude, TotalVelocity, GPSFix, Rssi
   const [dashboardFields, setDashboardFields] = useState({
     Altitude: null,
     TotalVelocity: null,
-    GPSFix: null,
+    Status6: null,
     Rssi: null,
+    Status9: null,
+    Max_Altitude: null,
+    Max_Velocity: null,
   });
-  // Holds a rolling history of telemetry points
   const [telemetryHistory, setTelemetryHistory] = useState([]);
   const latestPacket = useRef({
     Altitude: null,
     TotalVelocity: null,
-    GPSFix: null,
+    Status6: null,
     Rssi: null,
+    Status9: null,
+    Max_Altitude: null,
+    Max_Velocity: null,
   });
 
   const { connected, on, send } = useSignalR({
@@ -31,28 +32,28 @@ export function useDashboardData() {
 
   useEffect(() => {
     if (!connected) return;
-    send("SubscribeToSubSystem", "rocket");
 
-    const unsub = on("ReceiveSubSystemUpdate", (subId, eventName, data) => {
-      if (subId !== "rocket") return;
+    send("SubscribeToSubSystem", "flight-estimator");
+    send("SubscribeToSubSystem", "rocket"); // ✅ Subscribing to "rocket" for RSSI
 
-      if (eventName === "telemetry-update") {
-        const keys = ["Altitude", "TotalVelocity", "GPSFix"];
-        let updated = false;
-        const next = { ...latestPacket.current };
-        keys.forEach((key) => {
-          if (key in data) {
-            next[key] = data[key];
-            updated = true;
-          }
-        });
-        if (updated) {
-          latestPacket.current = next;
-        }
+    const unsub = on("ReceiveSubSystemUpdate", (subId, eventName, payload) => {
+      // Handle flight-estimator telemetry
+      if (subId === "flight-estimator" && eventName === "estimator-update") {
+        const signals = payload?.Signals ?? payload;
+        if (!signals) return;
+
+        if ("Altitude" in signals) latestPacket.current.Altitude = signals.Altitude;
+        if ("TotalVelocity" in signals) latestPacket.current.TotalVelocity = signals.TotalVelocity;
+        if ("Status6" in signals) latestPacket.current.Status6 = signals.Status6;
+        if ("Status9" in signals) latestPacket.current.Status9 = signals.Status9;
+        if ("Max_Altitude" in signals) latestPacket.current.Max_Altitude = signals.Max_Altitude;
+        if ("Max_Velocity" in signals) latestPacket.current.Max_Velocity = signals.Max_Velocity;
+        if ("rssi" in signals) latestPacket.current.Rssi = round(signals.rssi);
       }
 
-      if (eventName === "signal-quality") {
-        const rssi = round(data.rssi);
+      // Handle rocket signal-quality for RSSI
+      if (subId === "rocket" && eventName === "signal-quality") {
+        const rssi = round(payload.rssi);
         latestPacket.current.Rssi = rssi;
       }
     });
@@ -69,14 +70,15 @@ export function useDashboardData() {
         TotalVelocity: latestPacket.current.TotalVelocity,
         Rssi: latestPacket.current.Rssi,
       };
+
       setDashboardFields({ ...latestPacket.current });
       setTelemetryHistory((prev) => {
         const next = [...prev, point];
-        // Keep only the last 60 points
         if (next.length > 60) next.shift();
         return next;
       });
     }, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -86,17 +88,14 @@ export function useDashboardData() {
       : null;
   }
 
-  const sendCommand = useCallback(
-    (cmd) => {
-      send("SendCommand", cmd);
-    },
-    [send]
-  );
+  const sendCommand = (cmd) => {
+    send("SendCommand", cmd);
+  };
 
   return {
     connected,
-    dashboardFields,    // { Altitude, TotalVelocity, GPSFix, Rssi }
-    telemetryHistory,   // [{ timestamp, Altitude, TotalVelocity, Rssi }, …]
+    dashboardFields,
+    telemetryHistory,
     sendCommand,
   };
 }

@@ -93,7 +93,9 @@ namespace Gui.Core.Domain.Telemetry
                     }
                     break;
 
-                // FLIGHT ESTIMATOR SPECIAL CASES -- MOVED ABOVE DEFAULT!!
+                
+                case 2: // FlightComputer Status
+                case 3: // FlightComputer Max altitude + Max velocity
                 case 200: // FlightEstimatorStatus
                 case 201: // FlightEstimatorGNSSUTC
                 case 202: // FlightEstimatorOrientationRPY
