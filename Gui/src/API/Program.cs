@@ -15,8 +15,9 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services
     .AddCore()
     .AddInfrastructure(builder.Configuration);
-    builder.Services.AddSingleton<ISubSystemNotifier, SignalRSubSystemNotifier>();
-    builder.Services.AddScoped<CanService>();
+
+builder.Services.AddSingleton<ISubSystemNotifier, SignalRSubSystemNotifier>();
+builder.Services.AddScoped<CanService>();
 
 builder.Services.AddSignalR();
 
@@ -54,10 +55,12 @@ app.UseCors("CorsPolicy");
 
 // app.UseAuthorization();
 
+app.UseStaticFiles();
+
 app.MapControllers();
 
+app.MapFallbackToFile("index.html");
+
 app.MapHub<DashBoardHub>("/dashboardHub");
-
-
 
 app.Run();

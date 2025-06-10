@@ -10,7 +10,7 @@ import LoginPage from "@/features/auth/pages/loginPage";
 import TelemetryPage from "@/features/telemetry/pages/TelemetryPage";
 import EngineControlPage from "@/features/engine_control/pages/EngineControlPage";
 import FlightEstimatorPage from "@/features/flight_estimator/pages/FlightEstimatorPage";
-import DashboardPage from "@/features/Dashboard/pages/DashboardPage";
+import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 
 const router = createBrowserRouter([
     {
@@ -26,7 +26,6 @@ const router = createBrowserRouter([
                 index: true,
                 element: <DashboardPage />,
             },
-            
             {
                 path: "/telemetry",
                 element: <TelemetryPage />,
@@ -39,7 +38,6 @@ const router = createBrowserRouter([
                 path: "/flight-estimator",
                 element: <FlightEstimatorPage />,
             },
-           
         ],
     },
 ]);
