@@ -4,12 +4,15 @@ import { useBlackBoxHub } from "../hooks/useBlackBockHub";
 function BlackBoxPage() {
     const { blackBoxData, connected } = useBlackBoxHub();
 
+    
+
     const [systemStatus, setSystemStatus] = useState({
         overall: "operational",
         storage: { used: 45, total: 1000 }, // GB
         recording: true,
-        lastBackup: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        lastBackup: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago 
     });
+    console.log("🔍 blackBoxData:", blackBoxData);
 
     // Create cameras array based on real telemetry data
     const cameras = [

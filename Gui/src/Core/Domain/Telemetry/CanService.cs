@@ -142,7 +142,7 @@ namespace Gui.Core.Domain.Telemetry
 
                     var signalPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
 
-                    await _subSystemNotifier.NotifyDashboardAsync("flight-computer", "black-box-update", signalPayload);
+                    await _subSystemNotifier.NotifyDashboardAsync("black-box", "black-box-update", signalPayload);
                     break;
 
                 // DEFAULT SHOULD BE LAST!
