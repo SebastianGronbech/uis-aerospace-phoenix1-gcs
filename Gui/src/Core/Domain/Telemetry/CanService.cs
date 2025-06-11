@@ -100,37 +100,50 @@ namespace Gui.Core.Domain.Telemetry
                 case 203: // FlightEstimatorAltitude
                 case 204: // FlightEstimatorGNSSPosition
                 case 206: // FlightEstimatorVelocityClimbrate
-                {
+                    {
+                        foreach (var signal in message.Signals)
+                        {
+                            var decodedValue = DecodeSignal(frame, signal);
+                            signalMeasurements.Add(new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp));
+                        }
+
+                        var estimatorPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
+                        // Console.WriteLine($"[DEBUG] Entered CAN flight-estimator block for ID {messageId}");
+
+                        var sanitizedPayload = estimatorPayload
+                            .Where(kv =>
+                            {
+                                if (kv.Value is double d)
+                                    return !double.IsNaN(d) && !double.IsInfinity(d);
+                                return true;
+                            })
+                            .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+                        sanitizedPayload["LoggedAtUtc"] = timestamp.ToUniversalTime();
+                        // Console.WriteLine($"[DEBUG] Sanitized payload for {messageId}: " +
+                        //  string.Join(", ", sanitizedPayload.Select(kv => $"{kv.Key}={kv.Value}")));
+
+
+                        await _subSystemNotifier.NotifyDashboardAsync(
+                            "flight-estimator",
+                            "estimator-update",
+                            sanitizedPayload
+                        );
+                        break;
+                    }
+
+                case 400:
                     foreach (var signal in message.Signals)
                     {
                         var decodedValue = DecodeSignal(frame, signal);
-                        signalMeasurements.Add(new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp));
+                        var signalMeasurement = new SignalMeasurement(signal.Name, messageId, decodedValue, timestamp);
+                        signalMeasurements.Add(signalMeasurement);
                     }
 
-                    var estimatorPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
-                   // Console.WriteLine($"[DEBUG] Entered CAN flight-estimator block for ID {messageId}");
+                    var signalPayload = signalMeasurements.ToDictionary(m => m.Name, m => m.Value);
 
-                    var sanitizedPayload = estimatorPayload
-                        .Where(kv =>
-                        {
-                            if (kv.Value is double d)
-                                return !double.IsNaN(d) && !double.IsInfinity(d);
-                            return true;
-                        })
-                        .ToDictionary(kv => kv.Key, kv => kv.Value);
-
-                    sanitizedPayload["LoggedAtUtc"] = timestamp.ToUniversalTime();
-                   // Console.WriteLine($"[DEBUG] Sanitized payload for {messageId}: " +
-                      //  string.Join(", ", sanitizedPayload.Select(kv => $"{kv.Key}={kv.Value}")));
-                      
-
-                    await _subSystemNotifier.NotifyDashboardAsync(
-                        "flight-estimator",
-                        "estimator-update",
-                        sanitizedPayload
-                    );
+                    await _subSystemNotifier.NotifyDashboardAsync("flight-computer", "black-box-update", signalPayload);
                     break;
-                }
 
                 // DEFAULT SHOULD BE LAST!
                 default:
