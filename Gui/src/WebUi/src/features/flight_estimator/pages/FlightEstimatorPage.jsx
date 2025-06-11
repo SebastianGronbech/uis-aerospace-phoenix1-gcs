@@ -3,6 +3,7 @@ import ChartCard from "../components/ChartCard";
 import StatusDisplay from "../components/StatusDisplay";
 import ValuesDisplay from "../components/ValuesDisplay";
 import { useFlightEstimatorHub } from "../hooks/useFlightEstimatorHub";
+const baseUrl = import.meta.env.VITE_API_URL;
 
 import {
   Chart as ChartJS,
@@ -98,8 +99,6 @@ const statusMap = {
 
 
 
-;
-
   const statusItems = [
   { label: "Connected", isOn: connected },
   ...Object.entries(statusMap).map(([signalKey, label]) => {
@@ -154,13 +153,14 @@ const statusMap = {
 
       <div className="flex flex-wrap gap-2 mt-auto">
         {[
-          { label: "Calibrate Kalman", url: "http://localhost:5017/api/commands/21/send" },
-          { label: "Calibrate Altitude", url: "http://localhost:5017/api/commands/20/send" },
-          { label: "Start Recording", url: "http://localhost:5017/api/commands/22/send" },
-          { label: "Stop Recording", url: "http://localhost:5017/api/commands/23/send" },
-          { label: "Erase Recording", url: "http://localhost:5017/api/commands/24/send" },
-          { label: "Start Acc predictor", url: "http://localhost:5017/api/commands/25/send" },
-          { label: "Stop Acc predictor", url: "http://localhost:5017/api/commands/26/send" },
+          { label: "Calibrate Kalman", url: `${baseUrl}/api/commands/21/send` },
+          { label: "Calibrate Altitude", url: `${baseUrl}/api/commands/20/send` },
+          { label: "Start Recording", url: `${baseUrl}/api/commands/22/send` },
+          { label: "Stop Recording", url: `${baseUrl}/api/commands/23/send` },
+          { label: "Erase Recording", url: `${baseUrl}/api/commands/24/send` },
+          { label: "Start Acc predictor", url: `${baseUrl}/api/commands/25/send` },
+          { label: "Stop Acc predictor", url: `${baseUrl}/api/commands/26/send` },
+          { label: "Reboot", url: `${baseUrl}/api/commands/27/send` },
         ].map(({ label, url }) => (
           <button
             key={url}

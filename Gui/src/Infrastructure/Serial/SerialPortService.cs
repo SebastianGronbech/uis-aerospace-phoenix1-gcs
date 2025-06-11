@@ -92,6 +92,7 @@ public sealed class SerialPortService : BackgroundService, IPortSender
         {
             string incoming = _sp!.ReadExisting();
             _serialBuffer.Append(incoming);
+   //         Console.WriteLine($"Rx:{incoming} ");
 
             while (true)
             {

@@ -275,10 +275,12 @@ export default function TelemetryPage() {
     { label: "Serial TX OK", isOn: !groundTelemetry.IsSerialTxFull },
     { label: "Serial RX OK", isOn: !groundTelemetry.IsSerialRxFull },
   ] : [], [groundTelemetry]);
+  
 
   const handleReset = async (publicId) => {
   try {
-    const response = await fetch(`http://localhost:5017/api/commands/${publicId}/send`, {
+    const baseUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${baseUrl}/api/commands/${publicId}/send`, {
       method: "POST",
     });
 

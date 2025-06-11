@@ -1,125 +1,99 @@
-[
+[ 
     {
-        "Name": "ECUPressures",
+        "Name": "ECUStatuses",
         "Id": 101,
         "Signals": [
             {
-                "Name": "N2O",
+                "Name": "CalMotors",
                 "StartBit": 0,
-                "Length": 8,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
-                "Name": "ETH",
-                "StartBit": 8,
-                "Length": 8,
+                "Name": "IDLE",
+                "StartBit": 1,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
-                "Name": "OxIn",
-                "StartBit": 16,
-                "Length": 8,
+                "Name": "Homing",
+                "StartBit": 2,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             },
             {
-                "Name": "FulIn",
-                "StartBit": 24,
-                "Length": 8,
+                "Name": "Fire",
+                "StartBit": 3,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Abort",
+                "StartBit": 4,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Relief",
+                "StartBit": 5,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Fueling",
+                "StartBit": 6,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "ExitMotors",
+                "StartBit": 7,
+                "Length": 1,
                 "IsSigned": false,
                 "Type": "int"
             }
         ]
     },
     {
-        "Name": "ECUTemperaturesLines",
-        "Id": 102,
-        "Signals": [
-            {
-                "Name": "N2O",
-                "StartBit": 0,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            },
-            {
-                "Name": "ETH",
-                "StartBit": 32,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            }
-        ]
-    },
-    {
-        "Name": "ECUTemperaturesInjector",
-        "Id": 103,
-        "Signals": [
-            {
-                "Name": "OxIn",
-                "StartBit": 0,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            },
-            {
-                "Name": "FulIn",
-                "StartBit": 32,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            }
-        ]
-    },
-    {
-        "Name": "ECUTemperaturesWallsAndNozzles",
+        "Name": "ECUPressureTank",
         "Id": 104,
         "Signals": [
             {
-                "Name": "W1",
+                "Name": "N2OTank",
                 "StartBit": 0,
-                "Length": 16,
+                "Length": 32,
                 "IsSigned": false,
-                "Type": "int"
+                "Type": "float"
             },
             {
-                "Name": "W2",
-                "StartBit": 16,
-                "Length": 16,
-                "IsSigned": false,
-                "Type": "int"
-            },
-            {
-                "Name": "W3",
+                "Name": "ETHTank",
                 "StartBit": 32,
-                "Length": 16,
+                "Length": 32,
                 "IsSigned": false,
-                "Type": "int"
-            },
-            {
-                "Name": "W4",
-                "StartBit": 48,
-                "Length": 16,
-                "IsSigned": false,
-                "Type": "int"
+                "Type": "float"
             }
         ]
     },
     {
-        "Name": "ECUFlow",
+        "Name": "ECUTemperaturePropellant",
         "Id": 105,
         "Signals": [
             {
-                "Name": "N2O",
+                "Name": "N2OPropellant",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "ETH",
+                "Name": "ETHPropellant",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -128,18 +102,18 @@
         ]
     },
     {
-        "Name": "ECUPropellantConsumption",
+        "Name": "ECUPressureInjector",
         "Id": 106,
         "Signals": [
             {
-                "Name": "Ox",
+                "Name": "N2OInjector",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "Fuel",
+                "Name": "ETHInjector",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -148,18 +122,58 @@
         ]
     },
     {
-        "Name": "ECUServomotorsTemperature",
+        "Name": "ECUTemperatureInjector",
         "Id": 107,
         "Signals": [
             {
-                "Name": "M1",
+                "Name": "N2OInjectorTemp",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "M2",
+                "Name": "ETHInjectorTemp",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "CombustionChamber",
+        "Id": 108,
+        "Signals": [
+            {
+                "Name": "Pressure",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "Temperature",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "ECUServomotorTemperature",
+        "Id": 109,
+        "Signals": [
+            {
+                "Name": "M1Temp",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "M2Temp",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -169,17 +183,17 @@
     },
     {
         "Name": "ECUServomotorsCurrent",
-        "Id": 108,
+        "Id": 110,
         "Signals": [
             {
-                "Name": "M1",
+                "Name": "M1Curr",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "M2",
+                "Name": "M2Curr",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -189,57 +203,17 @@
     },
     {
         "Name": "ECUValvesPosition",
-        "Id": 109,
-        "Signals": [
-            {
-                "Name": "Ox",
-                "StartBit": 0,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            },
-            {
-                "Name": "Fuel",
-                "StartBit": 32,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            }
-        ]
-    },
-    {
-        "Name": "ECUPIDOx",
-        "Id": 110,
-        "Signals": [
-            {
-                "Name": "Error",
-                "StartBit": 0,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            },
-            {
-                "Name": "Integrator",
-                "StartBit": 32,
-                "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
-            }
-        ]
-    },
-    {
-        "Name": "ECUPIDFuel",
         "Id": 111,
         "Signals": [
             {
-                "Name": "Error",
+                "Name": "M1Pos",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "Integrator",
+                "Name": "M2Pos",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -248,18 +222,38 @@
         ]
     },
     {
-        "Name": "ECUMixtureRatio",
+        "Name": "ECUPropellantDensity",
         "Id": 112,
         "Signals": [
             {
-                "Name": "Desired",
+                "Name": "N20Den",
                 "StartBit": 0,
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "float"
             },
             {
-                "Name": "Measured",
+                "Name": "ETHDen",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }
+        ]
+    },
+    {
+        "Name": "Feed Forward",
+        "Id": 113,
+        "Signals": [
+            {
+                "Name": "N2OFF",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            },
+            {
+                "Name": "ETHFF",
                 "StartBit": 32,
                 "Length": 32,
                 "IsSigned": false,
@@ -277,7 +271,63 @@
                 "Length": 32,
                 "IsSigned": false,
                 "Type": "int"
-            } 
+            }, 
+            {
+                "Name": "Status10",
+                "StartBit": 32,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status11",
+                "StartBit":33,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status12",
+                "StartBit": 34,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status13",
+                "StartBit": 35,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            }, 
+            {
+                "Name": "Status14",
+                "StartBit": 36,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            }, 
+            {
+                "Name": "Status15",
+                "StartBit": 37,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status16",
+                "StartBit": 38,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            },
+            {
+                "Name": "Status17",
+                "StartBit": 39,
+                "Length": 1,
+                "IsSigned": false,
+                "Type": "int"
+            }  
         ]
     },
     {
@@ -298,6 +348,39 @@
                 "IsSigned": false,
                 "Type": "float"
             } 
+        ]
+    },
+    {
+        "Name": "FlightComputerPressures",
+        "Id": 4,
+        "Signals": [
+            {
+                "Name": "Drouge_pressure",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            } ,
+            {
+                "Name": "Main_pressure",
+                "StartBit": 32,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            } 
+        ]
+    },
+    {
+        "Name": "FlightComputerVoltages",
+        "Id": 5,
+        "Signals": [
+            {
+                "Name": "Voltage",
+                "StartBit": 0,
+                "Length": 32,
+                "IsSigned": false,
+                "Type": "float"
+            }  
         ]
     },
     {
@@ -547,15 +630,15 @@
                 "Name": "SNR",
                 "StartBit": 0,
                 "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
+                "IsSigned": true,
+                "Type": "int"
             },
             {
                 "Name": "RSSI",
                 "StartBit": 32,
                 "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
+                "IsSigned": true,
+                "Type": "int"
             }
         ]
     },
@@ -690,15 +773,15 @@
                 "Name": "SNR",
                 "StartBit": 0,
                 "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
+                "IsSigned": true,
+                "Type": "int"
             },
             {
                 "Name": "RSSI",
                 "StartBit": 32,
                 "Length": 32,
-                "IsSigned": false,
-                "Type": "float"
+                "IsSigned": true,
+                "Type": "int"
             }
         ]
     },
